@@ -249,6 +249,14 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
         @usableFromInline
         var _storage: InlineArray<capacity, (Int, Int, Int, Int, Int, Int, Int, Int)>
 
+        /// Workaround for Swift compiler bug where deinit element cleanup
+        /// doesn't work correctly for ~Copyable structs without reference types.
+        /// Adding an optional reference type changes how the compiler generates deinit.
+        /// See: swift-deque-primitives/Experiments/deque-inline-deinit-investigation
+        /// TODO: Remove when Swift compiler bug is fixed.
+        @usableFromInline
+        var _deinitWorkaround: AnyObject? = nil
+
         /// Creates an empty inline deque.
         @inlinable
         public init() {
@@ -269,11 +277,16 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
             let count = _count
             guard count > 0 else { return }
 
+            // Workaround: Copy storage state to local vars before cleanup.
+            // The _storage access through withUnsafeBytes may be optimized incorrectly
+            // for ~Copyable structs without reference type properties.
+            let head = _head
             let stride = MemoryLayout<Element>.stride
-            unsafe Swift.withUnsafeBytes(of: _storage) { bytes in
-                let basePtr = unsafe UnsafeMutableRawPointer(mutating: bytes.baseAddress!)
+
+            unsafe Swift.withUnsafePointer(to: _storage) { storagePtr in
+                let basePtr = UnsafeMutableRawPointer(mutating: UnsafeRawPointer(storagePtr))
                 for i in 0..<count {
-                    let physicalIndex = (_head + i) % Self.capacity
+                    let physicalIndex = (head + i) % Self.capacity
                     let elementPtr = unsafe (basePtr + physicalIndex * stride)
                         .assumingMemoryBound(to: Element.self)
                     unsafe elementPtr.deinitialize(count: 1)
