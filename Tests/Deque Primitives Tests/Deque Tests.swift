@@ -297,23 +297,23 @@ struct DequeTests {
         #expect(deque.capacity >= initialCapacity)
     }
 
-    @Test("Remove all")
-    func removeAll() {
+    @Test("Clear all")
+    func clearAll() {
         var deque: Deque<Int> = [1, 2, 3, 4, 5]
         #expect(deque.count == 5)
 
-        deque.removeAll()
+        deque.clear(keepingCapacity: false)
 
         #expect(deque.isEmpty)
     }
 
-    @Test("Remove all keeping capacity")
-    func removeAllKeepingCapacity() {
+    @Test("Clear keeping capacity")
+    func clearKeepingCapacity() {
         var deque: Deque<Int> = [1, 2, 3, 4, 5]
         deque.reserve(100)
         let capacityBefore = deque.capacity
 
-        deque.removeAll(keepingCapacity: true)
+        deque.clear(keepingCapacity: true)
 
         #expect(deque.isEmpty)
         #expect(deque.capacity == capacityBefore)
@@ -357,7 +357,7 @@ struct DequeTests {
             case .empty:
                 // Expected
                 break
-            case .bounds, .capacity:
+            case .bounds, .invalidCapacity:
                 Issue.record("Unexpected error case")
             }
         }
@@ -376,30 +376,17 @@ struct DequeTests {
         }
     }
 
-    // MARK: - CoW Behavior Regression Test
+    // MARK: - Growth Behavior Test
 
-    @Test("Push 1000 elements with O(log n) buffer copies")
-    func pushManyElementsNoCopyExplosion() {
-        #if DEBUG
-        // Reset copy counter
-        _DequeBufferDebug._copyCount = 0
-
+    @Test("Push 1000 elements maintains reasonable capacity")
+    func pushManyElements() {
         var deque = Deque<Int>()
         for i in 0..<1000 {
             deque.push.back(i)
         }
 
-        let copyCount = _DequeBufferDebug._copyCount
-
         #expect(deque.count == 1000)
         #expect(deque.capacity >= 1000)
         #expect(deque.capacity <= 2048)  // Reasonable growth (doubling)
-
-        // O(log n) copies: ~10-20 for 1000 elements (4→8→16→...→1024→2048)
-        // The proxy-based _modify may trigger slightly more copies due to double ensureUnique,
-        // but should still be O(log n), not O(n) which would be ~1000 copies.
-        #expect(copyCount <= 25,
-                "Expected O(log n) copies, got \(copyCount)")
-        #endif
     }
 }

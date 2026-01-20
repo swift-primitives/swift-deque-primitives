@@ -2,16 +2,16 @@
 //
 // This source file is part of the swift-standards open source project
 //
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-standards project authors
+// Copyright (c) 2024-2026 Coen ten Thije Boonkkamp and the swift-standards project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE for license information
 //
 // ===----------------------------------------------------------------------===//
 
-// MARK: - Peek Accessor
+// MARK: - Peek Accessor (Copyable elements only)
 
-extension Deque {
+extension Deque where Element: Copyable {
     /// Nested accessor for peek operations.
     ///
     /// ```swift
@@ -19,6 +19,9 @@ extension Deque {
     /// if let back = deque.peek.back { ... }
     /// if let front = deque.peek.front { ... }
     /// ```
+    ///
+    /// - Note: This accessor is only available for `Copyable` elements.
+    ///   For `~Copyable` elements, use ``peek(at:_:)`` with a closure.
     @inlinable
     public var peek: Peek {
         Peek(deque: self)
@@ -27,7 +30,7 @@ extension Deque {
 
 // MARK: - Peek Type
 
-extension Deque {
+extension Deque where Element: Copyable {
     /// Namespace for peek operations.
     public struct Peek {
         @usableFromInline
@@ -42,13 +45,13 @@ extension Deque {
 
 // MARK: - Peek Operations
 
-extension Deque.Peek {
+extension Deque.Peek where Element: Copyable {
     /// The element at the back of the deque, or `nil` if empty.
     ///
     /// - Complexity: O(1).
     @inlinable
     public var back: Element? {
-        deque._peek(at: .back)
+        deque.peek(at: .back)
     }
 
     /// The element at the front of the deque, or `nil` if empty.
@@ -56,6 +59,6 @@ extension Deque.Peek {
     /// - Complexity: O(1).
     @inlinable
     public var front: Element? {
-        deque._peek(at: .front)
+        deque.peek(at: .front)
     }
 }

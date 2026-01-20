@@ -2,16 +2,16 @@
 //
 // This source file is part of the swift-standards open source project
 //
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-standards project authors
+// Copyright (c) 2024-2026 Coen ten Thije Boonkkamp and the swift-standards project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE for license information
 //
 // ===----------------------------------------------------------------------===//
 
-// MARK: - Push Accessor
+// MARK: - Push Accessor (Copyable elements only)
 
-extension Deque {
+extension Deque where Element: Copyable {
     /// Nested accessor for push operations.
     ///
     /// ```swift
@@ -20,23 +20,25 @@ extension Deque {
     /// deque.push.front(0)
     /// ```
     ///
+    /// - Note: This accessor is only available for `Copyable` elements.
+    ///   For `~Copyable` elements, use ``push(_:to:)``.
+    ///
     /// - Note: `_modify` only - no `get` accessor to prevent silent discard of mutations.
     @inlinable
     public var push: Push {
         // _read provides a snapshot for read-only access (rarely used)
         _read {
-            yield Push(storage: storage)
+            yield Push(deque: self)
         }
         _modify {
             // CRITICAL: Force uniqueness + growth BEFORE transferring storage
-            // At this point, self.storage is the only reference
-            storage.ensureUnique(minimumCapacity: storage.count + 1)
+            makeUnique()
+            reserve(count + 1)
 
-            // Transfer storage ownership to proxy to maintain unique reference
-            // After this, proxy.storage.buffer is the only reference
-            var proxy = Push(storage: storage)
-            storage = Storage()  // Clear self.storage to release our reference
-            defer { storage = proxy.storage }
+            // Transfer ownership to proxy
+            var proxy = Push(deque: self)
+            self = Deque()  // Clear self to release our reference
+            defer { self = proxy.deque }
             yield &proxy
         }
     }
@@ -44,30 +46,29 @@ extension Deque {
 
 // MARK: - Push Type
 
-extension Deque {
+extension Deque where Element: Copyable {
     /// Namespace for push operations.
     public struct Push {
         @usableFromInline
-        var storage: Storage
+        var deque: Deque<Element>
 
         @usableFromInline
-        init(storage: Storage) {
-            self.storage = storage
+        init(deque: Deque<Element>) {
+            self.deque = deque
         }
     }
 }
 
 // MARK: - Push Operations
 
-extension Deque.Push {
+extension Deque.Push where Element: Copyable {
     /// Pushes an element to the back of the deque.
     ///
     /// - Parameter element: The element to push.
     /// - Complexity: O(1) amortized.
     @inlinable
     public mutating func back(_ element: Element) {
-        // ensureUnique already called in _modify, just append
-        storage.append(element)
+        deque.push(element, to: .back)
     }
 
     /// Pushes an element to the front of the deque.
@@ -76,7 +77,6 @@ extension Deque.Push {
     /// - Complexity: O(1) amortized.
     @inlinable
     public mutating func front(_ element: Element) {
-        // ensureUnique already called in _modify, just prepend
-        storage.prepend(element)
+        deque.push(element, to: .front)
     }
 }
