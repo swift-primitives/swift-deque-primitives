@@ -495,7 +495,7 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
         /// - Parameter capacity: Maximum number of elements. Must be non-negative.
         /// - Throws: ``Deque/Bounded/Error/invalidCapacity`` if capacity is negative.
         @inlinable
-        public init(capacity: Int) throws(__DequeBoundedError) {
+        public init(capacity: Int) throws(Deque<Element>.Bounded.Error) {
             guard capacity >= 0 else {
                 throw .invalidCapacity
             }
@@ -536,7 +536,7 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
     /// - Parameter capacity: Number of elements to reserve space for. Must be non-negative.
     /// - Throws: ``Deque/Error/invalidCapacity`` if capacity is negative.
     @inlinable
-    public init(reservingCapacity capacity: Int) throws(__DequeError) {
+    public init(reservingCapacity capacity: Int) throws(Deque<Element>.Error) {
         guard capacity >= 0 else {
             throw .invalidCapacity
         }
@@ -589,7 +589,7 @@ extension Deque.Bounded where Element: ~Copyable {
     /// - Throws: ``Deque/Bounded/Error/overflow`` if the deque is full.
     /// - Complexity: O(1)
     @inlinable
-    public mutating func push(_ element: consuming Element, to position: Deque<Element>.Position) throws(__DequeBoundedError) {
+    public mutating func push(_ element: consuming Element, to position: Deque<Element>.Position) throws(Deque<Element>.Bounded.Error) {
         guard !isFull else {
             throw .overflow
         }
@@ -652,7 +652,7 @@ extension Deque.Bounded where Element: Copyable {
 
     /// Pushes an element to the specified end of the deque (CoW-aware).
     @inlinable
-    public mutating func push(_ element: Element, to position: Deque<Element>.Position) throws(__DequeBoundedError) {
+    public mutating func push(_ element: Element, to position: Deque<Element>.Position) throws(Deque<Element>.Bounded.Error) {
         makeUnique()
         guard !isFull else {
             throw .overflow
@@ -1351,7 +1351,7 @@ extension Deque where Element: Copyable {
     /// - Returns: The element at the index.
     /// - Throws: `Deque.Error.bounds` if the index is out of bounds.
     @inlinable
-    public func element(at index: Int) throws(__DequeError) -> Element {
+    public func element(at index: Int) throws(Deque<Element>.Error) -> Element {
         guard index >= 0 && index < count else {
             throw .bounds(index: index, count: count)
         }
@@ -1380,7 +1380,7 @@ extension Deque where Element: Copyable {
 
     /// Internal helper for pop operations (legacy compatibility).
     @inlinable
-    mutating func _pop(from end: Position) throws(__DequeError) -> Element {
+    mutating func _pop(from end: Position) throws(Deque<Element>.Error) -> Element {
         guard let element = pop(from: end) else {
             throw .empty
         }

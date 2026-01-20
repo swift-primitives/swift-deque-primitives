@@ -74,8 +74,11 @@ public enum __DequeSmallError: Swift.Error, Sendable, Equatable {
 }
 
 // MARK: - Typealiases (Nest.Name API)
+//
+// IMPORTANT: Extensions MUST include `where Element: ~Copyable` to prevent
+// implicit Copyable constraint. This is a documented Swift compiler limitation.
 
-extension Deque {
+extension Deque where Element: ~Copyable {
     /// Errors that can occur during unbounded deque operations.
     ///
     /// ## Cases
@@ -86,7 +89,7 @@ extension Deque {
     public typealias Error = __DequeError
 }
 
-extension Deque.Bounded {
+extension Deque.Bounded where Element: ~Copyable {
     /// Errors that can occur during bounded deque operations.
     ///
     /// ## Cases
@@ -98,7 +101,7 @@ extension Deque.Bounded {
     public typealias Error = __DequeBoundedError
 }
 
-extension Deque.Inline {
+extension Deque.Inline where Element: ~Copyable {
     /// Errors that can occur during inline deque operations.
     ///
     /// ## Cases
@@ -108,7 +111,7 @@ extension Deque.Inline {
     public typealias Error = __DequeInlineError
 }
 
-extension Deque.Small {
+extension Deque.Small where Element: ~Copyable {
     /// Errors that can occur during small deque operations.
     ///
     /// ## Cases

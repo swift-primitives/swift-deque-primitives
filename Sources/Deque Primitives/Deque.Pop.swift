@@ -66,7 +66,7 @@ extension Deque.Pop where Element: Copyable {
     /// - Throws: `Deque.Error.empty` if the deque is empty.
     /// - Complexity: O(1).
     @inlinable
-    public mutating func back() throws(__DequeError) -> Element {
+    public mutating func back() throws(Deque<Element>.Error) -> Element {
         guard let element = deque.pop(from: .back) else {
             throw .empty
         }
@@ -79,7 +79,7 @@ extension Deque.Pop where Element: Copyable {
     /// - Throws: `Deque.Error.empty` if the deque is empty.
     /// - Complexity: O(1).
     @inlinable
-    public mutating func front() throws(__DequeError) -> Element {
+    public mutating func front() throws(Deque<Element>.Error) -> Element {
         guard let element = deque.pop(from: .front) else {
             throw .empty
         }
