@@ -18,15 +18,6 @@ extension Deque where Element: Copyable {
     public enum Push {}
 }
 
-// MARK: - Typealias
-
-extension Deque where Element: Copyable {
-    /// Shorthand for `Property_Primitives.Property<Tag, Deque<Element>>`.
-    ///
-    /// Used for method-based accessors where generic where clauses work.
-    public typealias Property<Tag> = Property_Primitives.Property<Tag, Deque<Element>>
-}
-
 // MARK: - Push Accessor (Copyable elements only)
 
 extension Deque where Element: Copyable {

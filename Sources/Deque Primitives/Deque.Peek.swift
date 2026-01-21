@@ -18,15 +18,6 @@ extension Deque where Element: Copyable {
     public enum Peek {}
 }
 
-// MARK: - Typealias
-
-extension Deque where Element: Copyable {
-    /// Shorthand for `Property_Primitives.Property<Tag, Deque<Element>>.Typed<Element>`.
-    ///
-    /// Used for property-based accessors where Element must be in extension scope.
-    public typealias PropertyTyped<Tag> = Property_Primitives.Property<Tag, Deque<Element>>.Typed<Element>
-}
-
 // MARK: - Peek Accessor (Copyable elements only)
 
 extension Deque where Element: Copyable {
@@ -41,7 +32,7 @@ extension Deque where Element: Copyable {
     /// - Note: This accessor is only available for `Copyable` elements.
     ///   For `~Copyable` elements, use ``peek(at:_:)`` with a closure.
     @inlinable
-    public var peek: PropertyTyped<Peek> {
+    public var peek: Property<Peek>.Typed<Element> {
         Property_Primitives.Property.Typed(self)
     }
 }

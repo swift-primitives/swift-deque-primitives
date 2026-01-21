@@ -38,16 +38,16 @@ extension Deque where Element: Copyable {
     ///
     /// - Note: `_modify` only - no `get` accessor to prevent silent discard of mutations.
     @inlinable
-    public var take: PropertyTyped<Take> {
+    public var take: Property<Take>.Typed<Element> {
         _read {
-            yield Property_Primitives.Property.Typed(self)
+            yield Property.Typed(self)
         }
         _modify {
             // Force uniqueness only (no growth needed for removal)
             makeUnique()
 
             // Transfer ownership to proxy
-            var property: PropertyTyped<Take> = Property_Primitives.Property.Typed(self)
+            var property: Property<Take>.Typed<Element> = Property.Typed(self)
             self = Deque()  // Clear self to release our reference
             defer { self = property.base }
             yield &property

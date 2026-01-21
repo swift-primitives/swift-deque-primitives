@@ -105,8 +105,8 @@ extension Deque.Small where Element: ~Copyable {
 
         // Copy elements in logical order (linearizing)
         let count = _count
-        let cap = unsafe oldStorage.header.bufferCapacity
-        let head = unsafe oldStorage.header.head
+        let cap = oldStorage.header.bufferCapacity
+        let head = oldStorage.header.head
 
         _ = unsafe oldStorage.withUnsafeMutablePointerToElements { src in
             unsafe newStorage.withUnsafeMutablePointerToElements { dst in
@@ -117,9 +117,9 @@ extension Deque.Small where Element: ~Copyable {
             }
         }
 
-        unsafe (newStorage.header.count = count)
-        unsafe (newStorage.header.head = 0)
-        unsafe (oldStorage.header.count = 0)  // Prevent double-free
+        (newStorage.header.count = count)
+        (newStorage.header.head = 0)
+        (oldStorage.header.count = 0)  // Prevent double-free
 
         _heap = newStorage
         unsafe (_heapPtr = newStorage._elementsPointer)
@@ -204,19 +204,22 @@ extension Deque.Small where Element: ~Copyable {
     /// - Returns: The result of the closure, or `nil` if the deque is empty.
     /// - Complexity: O(1)
     @inlinable
-    public func peek<R, E: Swift.Error>(at position: Deque<Element>.Position, _ body: (borrowing Element) throws(E) -> R) throws(E) -> R? {
+    public func peek<R, E: Swift.Error>(
+        at position: Deque<Element>.Position,
+        _ body: (borrowing Element) throws(E) -> R
+    ) throws(E) -> R? {
         guard _count > 0 else {
             return nil
         }
 
-        if let heap = _heap, let heapPtr = _heapPtr {
+        if let heap = _heap, let heapPtr = unsafe _heapPtr {
             let physicalIndex: Int
             switch position {
             case .front:
-                physicalIndex = unsafe heap.header.head
+                physicalIndex = heap.header.head
             case .back:
-                let cap = unsafe heap.header.bufferCapacity
-                let head = unsafe heap.header.head
+                let cap = heap.header.bufferCapacity
+                let head = heap.header.head
                 physicalIndex = (head + _count - 1) % cap
             }
             return try unsafe body((heapPtr + physicalIndex).pointee)
@@ -245,14 +248,14 @@ extension Deque.Small where Element: Copyable {
             return nil
         }
 
-        if let heap = _heap, let heapPtr = _heapPtr {
+        if let heap = _heap, let heapPtr = unsafe _heapPtr {
             let physicalIndex: Int
             switch position {
             case .front:
-                physicalIndex = unsafe heap.header.head
+                physicalIndex = heap.header.head
             case .back:
-                let cap = unsafe heap.header.bufferCapacity
-                let head = unsafe heap.header.head
+                let cap = heap.header.bufferCapacity
+                let head = heap.header.head
                 physicalIndex = (head + _count - 1) % cap
             }
             return unsafe (heapPtr + physicalIndex).pointee
@@ -282,9 +285,9 @@ extension Deque.Small where Element: ~Copyable {
     public func forEach<E: Swift.Error>(
         _ body: (borrowing Element) throws(E) -> Void
     ) throws(E) {
-        if let heap = _heap, let heapPtr = _heapPtr {
-            let cap = unsafe heap.header.bufferCapacity
-            let head = unsafe heap.header.head
+        if let heap = _heap, let heapPtr = unsafe _heapPtr {
+            let cap = heap.header.bufferCapacity
+            let head = heap.header.head
             for i in 0..<_count {
                 let physicalIndex = (head + i) % cap
                 try unsafe body((heapPtr + physicalIndex).pointee)
@@ -314,15 +317,15 @@ extension Deque.Small where Element: ~Copyable {
         let targetCount = Swift.max(0, newCount)
 
         if let heap = _heap {
-            let cap = unsafe heap.header.bufferCapacity
-            let head = unsafe heap.header.head
+            let cap = heap.header.bufferCapacity
+            let head = heap.header.head
             _ = unsafe heap.withUnsafeMutablePointerToElements { elements in
                 for i in targetCount..<_count {
                     let physicalIndex = (head + i) % cap
                     unsafe (elements + physicalIndex).deinitialize(count: 1)
                 }
             }
-            unsafe (heap.header.count = targetCount)
+            (heap.header.count = targetCount)
         } else {
             for i in targetCount..<_count {
                 let physicalIndex = (_head + i) % inlineCapacity
