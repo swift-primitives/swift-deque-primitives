@@ -38,16 +38,16 @@ extension Deque where Element: Copyable {
     ///
     /// - Note: `_modify` only - no `get` accessor to prevent silent discard of mutations.
     @inlinable
-    public var take: PropertyOf<Take> {
+    public var take: PropertyTyped<Take> {
         _read {
-            yield Property_Primitives.Property.Of(self)
+            yield Property_Primitives.Property.Typed(self)
         }
         _modify {
             // Force uniqueness only (no growth needed for removal)
             makeUnique()
 
             // Transfer ownership to proxy
-            var property: PropertyOf<Take> = Property_Primitives.Property.Of(self)
+            var property: PropertyTyped<Take> = Property_Primitives.Property.Typed(self)
             self = Deque()  // Clear self to release our reference
             defer { self = property.base }
             yield &property
@@ -57,7 +57,7 @@ extension Deque where Element: Copyable {
 
 // MARK: - Take Operations
 
-extension Property_Primitives.Property.Of where Tag == Deque<Element>.Take, Base == Deque<Element>, Element: Copyable {
+extension Property_Primitives.Property.Typed where Tag == Deque<Element>.Take, Base == Deque<Element>, Element: Copyable {
     /// Removes and returns the back element, or `nil` if empty.
     ///
     /// - Returns: The removed element, or `nil` if the deque is empty.
