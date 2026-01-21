@@ -17,9 +17,19 @@ let package = Package(
             targets: ["Deque Primitives"]
         )
     ],
+    dependencies: [
+        .package(path: "../swift-index-primitives"),
+        .package(path: "../swift-input-primitives"),
+        .package(path: "../swift-collection-primitives"),
+    ],
     targets: [
         .target(
-            name: "Deque Primitives"
+            name: "Deque Primitives",
+            dependencies: [
+                .product(name: "Index Primitives", package: "swift-index-primitives"),
+                .product(name: "Input Primitives", package: "swift-input-primitives"),
+                .product(name: "Collection Primitives", package: "swift-collection-primitives"),
+            ]
         ),
         .testTarget(
             name: "Deque Primitives Tests",
