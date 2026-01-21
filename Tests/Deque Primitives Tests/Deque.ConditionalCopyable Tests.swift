@@ -33,7 +33,7 @@ struct DequeConditionalCopyableTests {
         let copyCount = copy.count
         #expect(origCount == 3)
         #expect(copyCount == 3)
-        #expect(Array(original) == Array(copy))
+        #expect(Swift.Array(original) == Swift.Array(copy))
     }
 
     @Test("Deque.Bounded<Int> is Copyable")

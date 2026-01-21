@@ -46,8 +46,8 @@ struct DequeModelTests {
             elements.first
         }
 
-        subscript(index: Int) -> Element {
-            elements[index]
+        subscript(index: Index<Int>) -> Element {
+            elements[index.position.rawValue]
         }
     }
 
@@ -64,7 +64,7 @@ struct DequeModelTests {
         }
 
         #expect(deque.count == model.count)
-        #expect(Array(deque) == model.elements)
+        #expect(Swift.Array(deque) == model.elements)
     }
 
     @Test("Push front matches model")
@@ -78,7 +78,7 @@ struct DequeModelTests {
         }
 
         #expect(deque.count == model.count)
-        #expect(Array(deque) == model.elements)
+        #expect(Swift.Array(deque) == model.elements)
     }
 
     @Test("Pop back matches model")
@@ -94,7 +94,7 @@ struct DequeModelTests {
         }
 
         #expect(deque.count == model.count)
-        #expect(Array(deque) == model.elements)
+        #expect(Swift.Array(deque) == model.elements)
     }
 
     @Test("Pop front matches model")
@@ -110,7 +110,7 @@ struct DequeModelTests {
         }
 
         #expect(deque.count == model.count)
-        #expect(Array(deque) == model.elements)
+        #expect(Swift.Array(deque) == model.elements)
     }
 
     // MARK: - Mixed Operations
@@ -131,7 +131,7 @@ struct DequeModelTests {
             }
         }
 
-        #expect(Array(deque) == model.elements)
+        #expect(Swift.Array(deque) == model.elements)
     }
 
     @Test("Mixed pop operations")
@@ -153,7 +153,7 @@ struct DequeModelTests {
             }
         }
 
-        #expect(Array(deque) == model.elements)
+        #expect(Swift.Array(deque) == model.elements)
     }
 
     // MARK: - Index Access
@@ -164,8 +164,8 @@ struct DequeModelTests {
         var model = ArrayModel<Int>()
         for i in 0..<500 { model.pushBack(i) }
 
-        for i in 0..<500 {
-            #expect(deque[i] == model[i])
+        for i in try! (0..<500).map(Deque<Int>.Index.init) {
+            #expect((deque[i] == model[i]) == true)
         }
     }
 
@@ -191,8 +191,8 @@ struct DequeModelTests {
         var model = ArrayModel<Int>()
         for i in 0..<500 { model.pushBack(i) }
 
-        let reversedDeque = Array(deque.reversed())
-        let reversedModel = Array(model.elements.reversed())
+        let reversedDeque = Swift.Array(deque.reversed())
+        let reversedModel = Swift.Array(model.elements.reversed())
 
         #expect(reversedDeque == reversedModel)
     }
@@ -244,7 +244,7 @@ struct DequeModelTests {
         }
 
         #expect(deque.count == model.count)
-        #expect(Array(deque) == model.elements)
+        #expect(Swift.Array(deque) == model.elements)
     }
 
     // MARK: - Large Capacity via Init
@@ -264,6 +264,6 @@ struct DequeModelTests {
         #expect(deque[999] == model[999])
 
         // Iteration
-        #expect(Array(deque) == model.elements)
+        #expect(Swift.Array(deque) == model.elements)
     }
 }

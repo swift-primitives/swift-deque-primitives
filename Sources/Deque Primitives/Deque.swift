@@ -380,7 +380,7 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
             self._count = 0
             self._inline = InlineArray(repeating: (0, 0, 0, 0, 0, 0, 0, 0))
             self._heap = nil
-            self._heapPtr = nil
+            unsafe self._heapPtr = nil
         }
 
         deinit {
@@ -451,14 +451,14 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
             // Create heap storage with growth factor
             let newCapacity = Swift.max(minimumCapacity, inlineCapacity * 2, 8)
             let newStorage = Storage.create(minimumCapacity: newCapacity)
-            unsafe (newStorage.header.count = _count)
-            unsafe (newStorage.header.head = 0)
+            (newStorage.header.count = _count)
+            (newStorage.header.head = 0)
 
             // Move elements from inline to heap (linearizing the ring buffer)
             let stride = MemoryLayout<Element>.stride
             _ = unsafe Swift.withUnsafeBytes(of: _inline) { bytes in
                 unsafe newStorage.withUnsafeMutablePointerToElements { heapPtr in
-                    let inlineBase = UnsafeMutableRawPointer(mutating: bytes.baseAddress!)
+                    let inlineBase = unsafe UnsafeMutableRawPointer(mutating: bytes.baseAddress!)
                     for i in 0..<_count {
                         let physicalIndex = (_head + i) % inlineCapacity
                         let inlineElement = unsafe (inlineBase + physicalIndex * stride)
@@ -658,7 +658,7 @@ extension Deque.Bounded where Element: Copyable {
     mutating func makeUnique() {
         if !isKnownUniquelyReferenced(&_storage) {
             _storage = _storage.copy()
-            _cachedPtr = _storage._elementsPointer
+            unsafe _cachedPtr = _storage._elementsPointer
         }
     }
 
@@ -732,8 +732,8 @@ extension Deque.Bounded where Element: Copyable {
         guard !isEmpty else { return nil }
         let logicalIndex = position == .front ? 0 : count - 1
         let physicalIndex = _storage.physicalIndex(logicalIndex)
-        return _storage.withUnsafeMutablePointerToElements { elements in
-            elements[physicalIndex]
+        return unsafe _storage.withUnsafeMutablePointerToElements { elements in
+            unsafe elements[physicalIndex]
         }
     }
 }
@@ -781,7 +781,7 @@ extension Deque.Bounded where Element: ~Copyable {
 
         for i in targetCount..<currentCount {
             let physicalIndex = (head + i) % cap
-            (_cachedPtr + physicalIndex).deinitialize(count: 1)
+            unsafe (_cachedPtr + physicalIndex).deinitialize(count: 1)
         }
         _storage.header.count = targetCount
     }
@@ -801,7 +801,7 @@ extension Deque.Bounded where Element: Copyable {
 
         for i in targetCount..<currentCount {
             let physicalIndex = (head + i) % cap
-            (_cachedPtr + physicalIndex).deinitialize(count: 1)
+            unsafe (_cachedPtr + physicalIndex).deinitialize(count: 1)
         }
         _storage.header.count = targetCount
     }
@@ -852,11 +852,11 @@ extension Deque where Element: ~Copyable {
         let oldCapacity = currentCapacity
 
         if count > 0 {
-            _ = _storage.withUnsafeMutablePointerToElements { src in
-                newStorage.withUnsafeMutablePointerToElements { dst in
+            unsafe _storage.withUnsafeMutablePointerToElements { src in
+                unsafe newStorage.withUnsafeMutablePointerToElements { dst in
                     for i in 0..<count {
                         let srcIndex = (head + i) % oldCapacity
-                        (dst + i).initialize(to: (src + srcIndex).move())
+                        unsafe (dst + i).initialize(to: (src + srcIndex).move())
                     }
                 }
             }
@@ -867,7 +867,7 @@ extension Deque where Element: ~Copyable {
         _storage.header.count = 0  // Prevent double-free
 
         _storage = newStorage
-        _cachedPtr = _storage._elementsPointer  // CRITICAL: Update cached pointer
+        unsafe _cachedPtr = unsafe _storage._elementsPointer  // CRITICAL: Update cached pointer
     }
 
     /// Reserves enough space to store the specified number of elements.
@@ -1067,7 +1067,7 @@ extension Deque.Inline: @unchecked Sendable where Element: Sendable {}
 extension Deque.Small: @unchecked Sendable where Element: Sendable {}
 
 /// `Deque.Storage` is `Sendable` when its elements are `Sendable`.
-extension Deque.Storage: @unchecked Sendable where Element: Sendable {}
+//extension Deque.Storage: @unchecked Sendable where Element: Sendable {}
 
 // MARK: - Iteration (for ~Copyable elements)
 
@@ -1082,8 +1082,8 @@ extension Deque where Element: ~Copyable {
     public func forEach(_ body: (borrowing Element) -> Void) {
         let count = self.count
         guard count > 0 else { return }
-        let cap = unsafe _storage.header.bufferCapacity
-        let head = unsafe _storage.header.head
+        let cap = _storage.header.bufferCapacity
+        let head = _storage.header.head
 
         _ = unsafe _storage.withUnsafeMutablePointerToElements { elements in
             for i in 0..<count {
@@ -1113,7 +1113,7 @@ extension Deque: Sequence where Element: Copyable {
         @usableFromInline
         init(storage: Deque<Element>.Storage) {
             self._storage = storage
-            self._count = unsafe storage.header.count
+            self._count = storage.header.count
         }
 
         /// Advances to the next element and returns it, or nil if no next element exists.
@@ -1149,7 +1149,7 @@ extension Deque: Collection where Element: Copyable {
     public typealias Index = Index_Primitives.Index<Element>
 
     @inlinable
-    public var startIndex: Index { Index(0) }
+    public var startIndex: Index { .zero }
 
     @inlinable
     public var endIndex: Index { Index(__unchecked: (), position: count) }
@@ -1236,7 +1236,7 @@ extension Deque.Bounded: Sequence where Element: Copyable {
         @usableFromInline
         init(storage: Deque<Element>.Storage) {
             self._storage = storage
-            self._count = unsafe storage.header.count
+            self._count = storage.header.count
         }
 
         @inlinable
@@ -1350,18 +1350,18 @@ extension Deque.Storage where Element: Copyable {
     /// Creates a copy of this storage with all elements duplicated.
     @usableFromInline
     func copy() -> Deque.Storage {
-        let count = unsafe header.count
+        let count = header.count
         guard count > 0 else {
             return Deque.Storage.create()
         }
 
-        let new = Deque.Storage.create(minimumCapacity: unsafe header.bufferCapacity)
-        unsafe (new.header.count = count)
-        unsafe (new.header.head = 0)
+        let new = Deque.Storage.create(minimumCapacity: header.bufferCapacity)
+        (new.header.count = count)
+        (new.header.head = 0)
 
         // Copy elements in logical order (linearizing)
-        let cap = unsafe header.bufferCapacity
-        let head = unsafe header.head
+        let cap = header.bufferCapacity
+        let head = header.head
 
         _ = unsafe withUnsafeMutablePointerToElements { src in
             unsafe new.withUnsafeMutablePointerToElements { dst in
@@ -1471,7 +1471,7 @@ extension Deque where Element: Copyable {
     /// Buffer identity for CoW testing.
     @usableFromInline
     internal var _identity: ObjectIdentifier {
-        unsafe ObjectIdentifier(_storage)
+        ObjectIdentifier(_storage)
     }
 }
 

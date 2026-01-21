@@ -10,6 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 import Testing
+import Synchronization
 @testable import Deque_Primitives
 
 /// Tests verifying deinit order (front-to-back) for all Deque variants.
@@ -18,10 +19,11 @@ import Testing
 struct DequeDeinitOrderTests {
 
     /// Thread-safe tracker for deinit order
-    final class Tracker: @unchecked Sendable {
-        nonisolated(unsafe) var deinitOrder: [Int] = []
-        func reset() { deinitOrder = [] }
-        func append(_ id: Int) { deinitOrder.append(id) }
+    final class Tracker: Sendable {
+        private let _deinitOrder = Mutex<[Int]>([])
+        var deinitOrder: [Int] { _deinitOrder.withLock { $0 } }
+        func reset() { _deinitOrder.withLock { $0 = [] } }
+        func append(_ id: Int) { _deinitOrder.withLock { $0.append(id) } }
     }
 
     /// Element that tracks its deinit

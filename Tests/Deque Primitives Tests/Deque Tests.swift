@@ -51,7 +51,7 @@ struct DequeTests {
         deque.push.back(3)
         deque.push.front(0)
 
-        #expect(Array(deque) == [0, 1, 2, 3])
+        #expect(Swift.Array(deque) == [0, 1, 2, 3])
     }
 
     // MARK: - Nested Accessor: Pop
@@ -182,8 +182,8 @@ struct DequeTests {
         _ = copy.take.front
 
         #expect(original._identity != copy._identity)
-        #expect(Array(original) == [1, 2, 3])
-        #expect(Array(copy) == [2, 3])
+        #expect(Swift.Array(original) == [1, 2, 3])
+        #expect(Swift.Array(copy) == [2, 3])
     }
 
     // MARK: - Basic Properties
@@ -200,7 +200,7 @@ struct DequeTests {
         let deque = Deque([1, 2, 3, 4, 5])
 
         #expect(deque.count == 5)
-        #expect(Array(deque) == [1, 2, 3, 4, 5])
+        #expect(Swift.Array(deque) == [1, 2, 3, 4, 5])
     }
 
     @Test("Array literal initialization")
@@ -245,7 +245,7 @@ struct DequeTests {
     func bidirectionalIteration() {
         let deque: Deque<Int> = [1, 2, 3, 4, 5]
 
-        #expect(Array(deque.reversed()) == [5, 4, 3, 2, 1])
+        #expect(Swift.Array(deque.reversed()) == [5, 4, 3, 2, 1])
     }
 
     // MARK: - Copy-on-Write
@@ -280,8 +280,8 @@ struct DequeTests {
         copy.push.front(0)
         _ = try? copy.pop.back()
 
-        #expect(Array(original) == [1, 2, 3])
-        #expect(Array(copy) == [0, 1, 2])
+        #expect(Swift.Array(original) == [1, 2, 3])
+        #expect(Swift.Array(copy) == [0, 1, 2])
     }
 
     // MARK: - Capacity
@@ -367,13 +367,13 @@ struct DequeTests {
     func boundsError() {
         let deque: Deque<Int> = [1, 2, 3]
 
+        // Test index beyond count throws bounds error
         #expect(throws: Deque<Int>.Error.self) {
             _ = try deque.element(at: 10)
         }
 
-        #expect(throws: Deque<Int>.Error.self) {
-            _ = try deque.element(at: -1)
-        }
+        // Note: Negative indices are now prevented at Index construction time
+        // via precondition in Index.init, enforcing type-safe non-negative positions
     }
 
     // MARK: - Growth Behavior Test
