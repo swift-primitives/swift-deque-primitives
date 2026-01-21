@@ -9,6 +9,9 @@
 //
 // ===----------------------------------------------------------------------===//
 
+public import Index_Primitives
+public import Input_Primitives
+
 /// Double-ended queue with O(1) amortized operations at both ends.
 ///
 /// `Deque` is a value type with copy-on-write semantics backed by a ring buffer.
@@ -250,10 +253,9 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
         var _storage: InlineArray<capacity, (Int, Int, Int, Int, Int, Int, Int, Int)>
 
         /// Workaround for Swift compiler bug where deinit element cleanup
-        /// doesn't work correctly for ~Copyable structs without reference types.
-        /// Adding an optional reference type changes how the compiler generates deinit.
-        /// See: swift-deque-primitives/Experiments/deque-inline-deinit-investigation
-        /// TODO: Remove when Swift compiler bug is fixed.
+        /// fails for ~Copyable structs that contain only value-type properties.
+        /// Adding a reference type property (`AnyObject?`) fixes the bug.
+        /// See: https://github.com/swiftlang/swift/issues/86652
         @usableFromInline
         var _deinitWorkaround: AnyObject? = nil
 
@@ -277,19 +279,15 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
             let count = _count
             guard count > 0 else { return }
 
-            // Workaround: Copy storage state to local vars before cleanup.
-            // The _storage access through withUnsafeBytes may be optimized incorrectly
-            // for ~Copyable structs without reference type properties.
-            let head = _head
             let stride = MemoryLayout<Element>.stride
-
-            unsafe Swift.withUnsafePointer(to: _storage) { storagePtr in
-                let basePtr = UnsafeMutableRawPointer(mutating: UnsafeRawPointer(storagePtr))
-                for i in 0..<count {
-                    let physicalIndex = (head + i) % Self.capacity
-                    let elementPtr = unsafe (basePtr + physicalIndex * stride)
+            var index = _head
+            unsafe Swift.withUnsafeBytes(of: _storage) { bytes in
+                let basePtr = unsafe UnsafeMutableRawPointer(mutating: bytes.baseAddress!)
+                for _ in 0..<count {
+                    let elementPtr = unsafe (basePtr + index * stride)
                         .assumingMemoryBound(to: Element.self)
                     unsafe elementPtr.deinitialize(count: 1)
+                    index = (index + 1) % capacity
                 }
             }
         }
@@ -498,6 +496,7 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
 
         /// Cached pointer to element storage.
         @usableFromInline
+        @unsafe
         var _cachedPtr: UnsafeMutablePointer<Element>
 
         /// The maximum number of elements the deque can hold.
@@ -508,7 +507,7 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
         /// - Parameter capacity: Maximum number of elements. Must be non-negative.
         /// - Throws: ``Deque/Bounded/Error/invalidCapacity`` if capacity is negative.
         @inlinable
-        public init(capacity: Int) throws(Deque<Element>.Bounded.Error) {
+        public init(capacity: Int) throws(__Deque.Bounded.Error) {
             guard capacity >= 0 else {
                 throw .invalidCapacity
             }
@@ -1143,30 +1142,35 @@ extension Deque.Iterator: @unchecked Sendable where Element: Sendable {}
 // MARK: - Collection (Copyable elements only)
 
 extension Deque: Collection where Element: Copyable {
-    public typealias Index = Int
+    /// Type-safe index for deque elements.
+    ///
+    /// Uses `Index<Element>` to provide compile-time safety preventing
+    /// cross-collection index confusion.
+    public typealias Index = Index_Primitives.Index<Element>
 
     @inlinable
-    public var startIndex: Index { 0 }
+    public var startIndex: Index { Index(0) }
 
     @inlinable
-    public var endIndex: Index { count }
+    public var endIndex: Index { Index(__unchecked: (), position: count) }
 
     @inlinable
     public func index(after i: Index) -> Index {
-        i + 1
+        // Force unwrap safe: Collection requires i != endIndex, so i+1 is always valid
+        (i + Index.Offset(1))!
     }
 
     /// Accesses the element at the specified index.
     @inlinable
-    public subscript(index: Int) -> Element {
+    public subscript(index: Index) -> Element {
         get {
-            precondition(index >= 0 && index < count, "Index out of bounds")
-            return _readElement(at: index)
+            precondition(index >= startIndex && index < endIndex, "Index out of bounds")
+            return _readElement(at: index.position.rawValue)
         }
         set {
-            precondition(index >= 0 && index < count, "Index out of bounds")
+            precondition(index >= startIndex && index < endIndex, "Index out of bounds")
             makeUnique()
-            let physicalIndex = _storage.physicalIndex(index)
+            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
             unsafe _storage.withUnsafeMutablePointerToElements { elements in
                 unsafe (elements[physicalIndex] = newValue)
             }
@@ -1179,7 +1183,8 @@ extension Deque: Collection where Element: Copyable {
 extension Deque: BidirectionalCollection where Element: Copyable {
     @inlinable
     public func index(before i: Index) -> Index {
-        i - 1
+        // Force unwrap safe: BidirectionalCollection requires i != startIndex, so i-1 is always valid
+        (i - Index.Offset(1))!
     }
 }
 
@@ -1188,17 +1193,18 @@ extension Deque: BidirectionalCollection where Element: Copyable {
 extension Deque: RandomAccessCollection where Element: Copyable {
     @inlinable
     public func distance(from start: Index, to end: Index) -> Int {
-        end - start
+        (end.position - start.position).rawValue
     }
 
     @inlinable
     public func index(_ i: Index, offsetBy distance: Int) -> Index {
-        i + distance
+        // Force unwrap safe: Collection requires result be valid index; caller's precondition
+        (i + Index.Offset(distance))!
     }
 
     @inlinable
     public func index(_ i: Index, offsetBy distance: Int, limitedBy limit: Index) -> Index? {
-        let result = i + distance
+        guard let result = i + Index.Offset(distance) else { return nil }
         if distance >= 0 {
             return result <= limit ? result : nil
         } else {
@@ -1247,6 +1253,93 @@ extension Deque.Bounded: Sequence where Element: Copyable {
     @inlinable
     public func makeIterator() -> Iterator {
         Iterator(storage: _storage)
+    }
+}
+
+// MARK: - Bounded Input Conformance
+// NOTE: Per [MEM-COPY-006], protocol conformances for nested types MUST be in the
+// same file as the type declaration to avoid breaking ~Copyable propagation.
+
+extension Deque.Bounded: Input.Streaming where Element: Copyable {
+    @inlinable
+    public var isEmpty: Bool { count == 0 }
+
+    @inlinable
+    public var first: Element? {
+        peek(at: .front)
+    }
+
+    @inlinable
+    @discardableResult
+    public mutating func advance() -> Element {
+        guard let element = pop(from: .front) else {
+            preconditionFailure("Cannot advance from empty deque")
+        }
+        return element
+    }
+}
+
+extension Deque.Bounded: Input.`Protocol` where Element: Copyable {
+    public struct Checkpoint: Sendable, Comparable {
+        @usableFromInline
+        let head: Int
+
+        @usableFromInline
+        let count: Int
+
+        @usableFromInline
+        init(head: Int, count: Int) {
+            self.head = head
+            self.count = count
+        }
+
+        @inlinable
+        public static func < (lhs: Checkpoint, rhs: Checkpoint) -> Bool {
+            // Earlier checkpoints have higher counts (less consumed)
+            lhs.count > rhs.count
+        }
+    }
+
+    @inlinable
+    public var checkpoint: Checkpoint {
+        Checkpoint(head: _storage.header.head, count: _storage.header.count)
+    }
+
+    @inlinable
+    public var checkpointRange: ClosedRange<Checkpoint> {
+        checkpoint...checkpoint
+    }
+
+    @inlinable
+    public mutating func setPosition(to checkpoint: Checkpoint) {
+        makeUnique()
+        _storage.header.head = checkpoint.head
+        _storage.header.count = checkpoint.count
+    }
+
+    @inlinable
+    public mutating func advance(by n: Int) {
+        precondition(n >= 0 && n <= count, "Cannot advance by more elements than available")
+        makeUnique()
+        for _ in 0..<n {
+            _ = _storage.removeFirst()
+        }
+    }
+
+    @inlinable
+    public var remaining: Self {
+        self
+    }
+}
+
+extension Deque.Bounded: Input.Access.Random where Element: Copyable {
+    @inlinable
+    public subscript(offset offset: Int) -> Element {
+        precondition(offset >= 0 && offset < count, "Offset out of bounds")
+        let physicalIndex = _storage.physicalIndex(offset)
+        return unsafe _storage.withUnsafeMutablePointerToElements { elements in
+            unsafe elements[physicalIndex]
+        }
     }
 }
 
@@ -1364,11 +1457,11 @@ extension Deque where Element: Copyable {
     /// - Returns: The element at the index.
     /// - Throws: `Deque.Error.bounds` if the index is out of bounds.
     @inlinable
-    public func element(at index: Int) throws(Deque<Element>.Error) -> Element {
-        guard index >= 0 && index < count else {
-            throw .bounds(index: index, count: count)
+    public func element(at index: Index) throws(Deque<Element>.Error) -> Element {
+        guard index >= startIndex && index < endIndex else {
+            throw .bounds(index: index.position.rawValue, count: count)
         }
-        return _readElement(at: index)
+        return _readElement(at: index.position.rawValue)
     }
 }
 

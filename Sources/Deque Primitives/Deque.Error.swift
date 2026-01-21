@@ -22,6 +22,7 @@
 // - Deque<Element>.Error
 // - Deque<Element>.Bounded.Error
 // - Deque<Element>.Inline.Error
+// - Deque<Element>.Small.Error
 
 /// Hoisted implementation of ``Deque/Error``.
 ///
@@ -37,46 +38,7 @@ public enum __DequeError: Swift.Error, Sendable, Equatable {
     case invalidCapacity
 }
 
-/// Hoisted implementation of ``Deque/Bounded/Error``.
-///
-/// - Note: Use ``Deque/Bounded/Error`` in your code, not this type directly.
-public enum __DequeBoundedError: Swift.Error, Sendable, Equatable {
-    /// The requested capacity is invalid (negative).
-    case invalidCapacity
-
-    /// The deque is full and cannot accept more elements.
-    case overflow
-
-    /// An operation was attempted on an empty deque.
-    case empty
-
-    /// An index was out of bounds.
-    case bounds(index: Int, count: Int)
-}
-
-/// Hoisted implementation of ``Deque/Inline/Error``.
-///
-/// - Note: Use ``Deque/Inline/Error`` in your code, not this type directly.
-public enum __DequeInlineError: Swift.Error, Sendable, Equatable {
-    /// The deque is full and cannot accept more elements.
-    case overflow
-
-    /// An operation was attempted on an empty deque.
-    case empty
-}
-
-/// Hoisted implementation of ``Deque/Small/Error``.
-///
-/// - Note: Use ``Deque/Small/Error`` in your code, not this type directly.
-public enum __DequeSmallError: Swift.Error, Sendable, Equatable {
-    /// An operation was attempted on an empty deque.
-    case empty
-}
-
-// MARK: - Typealiases (Nest.Name API)
-//
-// IMPORTANT: Extensions MUST include `where Element: ~Copyable` to prevent
-// implicit Copyable constraint. This is a documented Swift compiler limitation.
+// MARK: - Main Error Typealias
 
 extension Deque where Element: ~Copyable {
     /// Errors that can occur during unbounded deque operations.
@@ -87,37 +49,6 @@ extension Deque where Element: ~Copyable {
     /// - ``Deque/Error/bounds(index:count:)``: An index was out of bounds.
     /// - ``Deque/Error/invalidCapacity``: The requested capacity is invalid.
     public typealias Error = __DequeError
-}
-
-extension Deque.Bounded where Element: ~Copyable {
-    /// Errors that can occur during bounded deque operations.
-    ///
-    /// ## Cases
-    ///
-    /// - ``Deque/Bounded/Error/invalidCapacity``: The requested capacity is invalid (negative).
-    /// - ``Deque/Bounded/Error/overflow``: The deque is full and cannot accept more elements.
-    /// - ``Deque/Bounded/Error/empty``: An operation was attempted on an empty deque.
-    /// - ``Deque/Bounded/Error/bounds(index:count:)``: An index was out of bounds.
-    public typealias Error = __DequeBoundedError
-}
-
-extension Deque.Inline where Element: ~Copyable {
-    /// Errors that can occur during inline deque operations.
-    ///
-    /// ## Cases
-    ///
-    /// - ``Deque/Inline/Error/overflow``: The deque is full and cannot accept more elements.
-    /// - ``Deque/Inline/Error/empty``: An operation was attempted on an empty deque.
-    public typealias Error = __DequeInlineError
-}
-
-extension Deque.Small where Element: ~Copyable {
-    /// Errors that can occur during small deque operations.
-    ///
-    /// ## Cases
-    ///
-    /// - ``Deque/Small/Error/empty``: An operation was attempted on an empty deque.
-    public typealias Error = __DequeSmallError
 }
 
 // MARK: - CustomStringConvertible
@@ -135,7 +66,76 @@ extension __DequeError: CustomStringConvertible {
     }
 }
 
-extension __DequeBoundedError: CustomStringConvertible {
+// MARK: - Hoisted Variant Error Types
+//
+// Uses nested namespace pattern per [API-NAME-002] to avoid compound identifiers
+// like `__DequeBoundedError`. Instead uses `__Deque.Bounded.Error`.
+
+/// Hoisted namespace for Deque variant error types.
+///
+/// This namespace enum avoids compound identifiers like `__DequeBoundedError`
+/// per [API-NAME-002], providing the preferred `__Deque.Bounded.Error` pattern.
+///
+/// - Note: Use the typealias forms (e.g., ``Deque/Bounded/Error``) in your code,
+///   not this namespace directly.
+public enum __Deque {
+    /// Namespace for Deque.Bounded error types.
+    public enum Bounded {
+        /// Errors that can occur during bounded deque operations.
+        ///
+        /// ## Cases
+        ///
+        /// - ``__Deque/Bounded/Error/invalidCapacity``: The requested capacity is invalid (negative).
+        /// - ``__Deque/Bounded/Error/overflow``: The deque is full and cannot accept more elements.
+        /// - ``__Deque/Bounded/Error/empty``: An operation was attempted on an empty deque.
+        /// - ``__Deque/Bounded/Error/bounds(index:count:)``: An index was out of bounds.
+        public enum Error: Swift.Error, Sendable, Equatable {
+            /// The requested capacity is invalid (negative).
+            case invalidCapacity
+            /// The deque is full and cannot accept more elements.
+            case overflow
+            /// An operation was attempted on an empty deque.
+            case empty
+            /// An index was out of bounds.
+            case bounds(index: Int, count: Int)
+        }
+    }
+
+    /// Namespace for Deque.Inline error types.
+    public enum Inline {
+        /// Errors that can occur during inline deque operations.
+        ///
+        /// ## Cases
+        ///
+        /// - ``__Deque/Inline/Error/overflow``: The deque is full and cannot accept more elements.
+        /// - ``__Deque/Inline/Error/empty``: An operation was attempted on an empty deque.
+        public enum Error: Swift.Error, Sendable, Equatable {
+            /// The deque is full and cannot accept more elements.
+            case overflow
+            /// An operation was attempted on an empty deque.
+            case empty
+        }
+    }
+
+    /// Namespace for Deque.Small error types.
+    public enum Small {
+        /// Errors that can occur during small deque operations.
+        ///
+        /// ## Cases
+        ///
+        /// - ``__Deque/Small/Error/empty``: An operation was attempted on an empty deque.
+        ///
+        /// - Note: Small deques grow to heap storage on overflow, so overflow is not possible.
+        public enum Error: Swift.Error, Sendable, Equatable {
+            /// An operation was attempted on an empty deque.
+            case empty
+        }
+    }
+}
+
+// MARK: - Hoisted Variant Error CustomStringConvertible
+
+extension __Deque.Bounded.Error: CustomStringConvertible {
     public var description: String {
         switch self {
         case .invalidCapacity:
@@ -150,7 +150,7 @@ extension __DequeBoundedError: CustomStringConvertible {
     }
 }
 
-extension __DequeInlineError: CustomStringConvertible {
+extension __Deque.Inline.Error: CustomStringConvertible {
     public var description: String {
         switch self {
         case .overflow:
@@ -161,11 +161,47 @@ extension __DequeInlineError: CustomStringConvertible {
     }
 }
 
-extension __DequeSmallError: CustomStringConvertible {
+extension __Deque.Small.Error: CustomStringConvertible {
     public var description: String {
         switch self {
         case .empty:
             return "operation attempted on empty deque"
         }
     }
+}
+
+// MARK: - Variant Error Typealiases (Nest.Name API)
+//
+// IMPORTANT: Extensions MUST include `where Element: ~Copyable` to prevent
+// implicit Copyable constraint. This is a documented Swift compiler limitation.
+
+extension Deque.Bounded where Element: ~Copyable {
+    /// Errors that can occur during bounded deque operations.
+    ///
+    /// ## Cases
+    ///
+    /// - ``Deque/Bounded/Error/invalidCapacity``: The requested capacity is invalid (negative).
+    /// - ``Deque/Bounded/Error/overflow``: The deque is full and cannot accept more elements.
+    /// - ``Deque/Bounded/Error/empty``: An operation was attempted on an empty deque.
+    /// - ``Deque/Bounded/Error/bounds(index:count:)``: An index was out of bounds.
+    public typealias Error = __Deque.Bounded.Error
+}
+
+extension Deque.Inline where Element: ~Copyable {
+    /// Errors that can occur during inline deque operations.
+    ///
+    /// ## Cases
+    ///
+    /// - ``Deque/Inline/Error/overflow``: The deque is full and cannot accept more elements.
+    /// - ``Deque/Inline/Error/empty``: An operation was attempted on an empty deque.
+    public typealias Error = __Deque.Inline.Error
+}
+
+extension Deque.Small where Element: ~Copyable {
+    /// Errors that can occur during small deque operations.
+    ///
+    /// ## Cases
+    ///
+    /// - ``Deque/Small/Error/empty``: An operation was attempted on an empty deque.
+    public typealias Error = __Deque.Small.Error
 }
