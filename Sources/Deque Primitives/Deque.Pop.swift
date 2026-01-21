@@ -34,7 +34,7 @@ extension Deque where Element: Copyable {
     ///
     /// - Note: `_modify` only - no `get` accessor to prevent silent discard of mutations.
     @inlinable
-    public var pop: Property<Pop, Deque<Element>> {
+    public var pop: Property<Pop> {
         _read {
             yield Property(self)
         }
@@ -43,7 +43,7 @@ extension Deque where Element: Copyable {
             makeUnique()
 
             // Transfer ownership to proxy
-            var property: Property<Pop, Deque<Element>> = Property(self)
+            var property: Property<Pop> = Property(self)
             self = Deque()  // Clear self to release our reference
             defer { self = property.base }
             yield &property
@@ -53,7 +53,7 @@ extension Deque where Element: Copyable {
 
 // MARK: - Pop Operations
 
-extension Property {
+extension Property_Primitives.Property {
     /// Pops an element from the back of the deque.
     ///
     /// - Returns: The removed element.

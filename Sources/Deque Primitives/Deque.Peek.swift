@@ -21,10 +21,10 @@ extension Deque where Element: Copyable {
 // MARK: - Typealias
 
 extension Deque where Element: Copyable {
-    /// Shorthand for `Property<Tag, Deque<Element>>.Of<Element>`.
+    /// Shorthand for `Property_Primitives.Property<Tag, Deque<Element>>.Of<Element>`.
     ///
-    /// Eliminates redundant `Element` specification in property types.
-    public typealias PropertyOf<Tag> = Property<Tag, Deque<Element>>.Of<Element>
+    /// Used for property-based accessors where Element must be in extension scope.
+    public typealias PropertyOf<Tag> = Property_Primitives.Property<Tag, Deque<Element>>.Of<Element>
 }
 
 // MARK: - Peek Accessor (Copyable elements only)
@@ -42,13 +42,13 @@ extension Deque where Element: Copyable {
     ///   For `~Copyable` elements, use ``peek(at:_:)`` with a closure.
     @inlinable
     public var peek: PropertyOf<Peek> {
-        Property.Of(self)
+        Property_Primitives.Property.Of(self)
     }
 }
 
 // MARK: - Peek Operations
 
-extension Property.Of where Tag == Deque<Element>.Peek, Base == Deque<Element>, Element: Copyable {
+extension Property_Primitives.Property.Of where Tag == Deque<Element>.Peek, Base == Deque<Element>, Element: Copyable {
     /// The element at the back of the deque, or `nil` if empty.
     ///
     /// - Returns: The back element, or `nil` if the deque is empty.

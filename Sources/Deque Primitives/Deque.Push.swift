@@ -18,6 +18,15 @@ extension Deque where Element: Copyable {
     public enum Push {}
 }
 
+// MARK: - Typealias
+
+extension Deque where Element: Copyable {
+    /// Shorthand for `Property_Primitives.Property<Tag, Deque<Element>>`.
+    ///
+    /// Used for method-based accessors where generic where clauses work.
+    public typealias Property<Tag> = Property_Primitives.Property<Tag, Deque<Element>>
+}
+
 // MARK: - Push Accessor (Copyable elements only)
 
 extension Deque where Element: Copyable {
@@ -34,7 +43,7 @@ extension Deque where Element: Copyable {
     ///
     /// - Note: `_modify` only - no `get` accessor to prevent silent discard of mutations.
     @inlinable
-    public var push: Property<Push, Deque<Element>> {
+    public var push: Property<Push> {
         // _read provides a snapshot for read-only access (rarely used)
         _read {
             yield Property(self)
@@ -45,7 +54,7 @@ extension Deque where Element: Copyable {
             reserve(count + 1)
 
             // Transfer ownership to proxy
-            var property: Property<Push, Deque<Element>> = Property(self)
+            var property: Property<Push> = Property(self)
             self = Deque()  // Clear self to release our reference
             defer { self = property.base }
             yield &property
@@ -55,7 +64,7 @@ extension Deque where Element: Copyable {
 
 // MARK: - Push Operations
 
-extension Property {
+extension Property_Primitives.Property {
     /// Pushes an element to the back of the deque.
     ///
     /// - Parameter element: The element to push.
