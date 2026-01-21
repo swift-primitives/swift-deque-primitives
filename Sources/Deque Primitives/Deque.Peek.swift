@@ -9,6 +9,24 @@
 //
 // ===----------------------------------------------------------------------===//
 
+// MARK: - Peek Tag
+
+extension Deque where Element: Copyable {
+    /// Phantom tag for peek operations.
+    ///
+    /// Used with ``Property`` to provide namespaced peek properties.
+    public enum Peek {}
+}
+
+// MARK: - Typealias
+
+extension Deque where Element: Copyable {
+    /// Shorthand for `Property<Tag, Deque<Element>>.Of<Element>`.
+    ///
+    /// Eliminates redundant `Element` specification in property types.
+    public typealias PropertyOf<Tag> = Property<Tag, Deque<Element>>.Of<Element>
+}
+
 // MARK: - Peek Accessor (Copyable elements only)
 
 extension Deque where Element: Copyable {
@@ -23,42 +41,29 @@ extension Deque where Element: Copyable {
     /// - Note: This accessor is only available for `Copyable` elements.
     ///   For `~Copyable` elements, use ``peek(at:_:)`` with a closure.
     @inlinable
-    public var peek: Peek {
-        Peek(deque: self)
-    }
-}
-
-// MARK: - Peek Type
-
-extension Deque where Element: Copyable {
-    /// Namespace for peek operations.
-    public struct Peek {
-        @usableFromInline
-        let deque: Deque<Element>
-
-        @usableFromInline
-        init(deque: Deque<Element>) {
-            self.deque = deque
-        }
+    public var peek: PropertyOf<Peek> {
+        Property.Of(self)
     }
 }
 
 // MARK: - Peek Operations
 
-extension Deque.Peek where Element: Copyable {
+extension Property.Of where Tag == Deque<Element>.Peek, Base == Deque<Element>, Element: Copyable {
     /// The element at the back of the deque, or `nil` if empty.
     ///
+    /// - Returns: The back element, or `nil` if the deque is empty.
     /// - Complexity: O(1).
     @inlinable
     public var back: Element? {
-        deque.peek(at: .back)
+        base.peek(at: .back)
     }
 
     /// The element at the front of the deque, or `nil` if empty.
     ///
+    /// - Returns: The front element, or `nil` if the deque is empty.
     /// - Complexity: O(1).
     @inlinable
     public var front: Element? {
-        deque.peek(at: .front)
+        base.peek(at: .front)
     }
 }

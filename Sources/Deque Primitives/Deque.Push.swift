@@ -9,6 +9,15 @@
 //
 // ===----------------------------------------------------------------------===//
 
+// MARK: - Push Tag
+
+extension Deque where Element: Copyable {
+    /// Phantom tag for push operations.
+    ///
+    /// Used with ``Property`` to provide namespaced push methods.
+    public enum Push {}
+}
+
 // MARK: - Push Accessor (Copyable elements only)
 
 extension Deque where Element: Copyable {
@@ -25,10 +34,10 @@ extension Deque where Element: Copyable {
     ///
     /// - Note: `_modify` only - no `get` accessor to prevent silent discard of mutations.
     @inlinable
-    public var push: Push {
+    public var push: Property<Push, Deque<Element>> {
         // _read provides a snapshot for read-only access (rarely used)
         _read {
-            yield Push(deque: self)
+            yield Property(self)
         }
         _modify {
             // CRITICAL: Force uniqueness + growth BEFORE transferring storage
@@ -36,39 +45,25 @@ extension Deque where Element: Copyable {
             reserve(count + 1)
 
             // Transfer ownership to proxy
-            var proxy = Push(deque: self)
+            var property: Property<Push, Deque<Element>> = Property(self)
             self = Deque()  // Clear self to release our reference
-            defer { self = proxy.deque }
-            yield &proxy
-        }
-    }
-}
-
-// MARK: - Push Type
-
-extension Deque where Element: Copyable {
-    /// Namespace for push operations.
-    public struct Push {
-        @usableFromInline
-        var deque: Deque<Element>
-
-        @usableFromInline
-        init(deque: Deque<Element>) {
-            self.deque = deque
+            defer { self = property.base }
+            yield &property
         }
     }
 }
 
 // MARK: - Push Operations
 
-extension Deque.Push where Element: Copyable {
+extension Property {
     /// Pushes an element to the back of the deque.
     ///
     /// - Parameter element: The element to push.
     /// - Complexity: O(1) amortized.
     @inlinable
-    public mutating func back(_ element: Element) {
-        deque.push(element, to: .back)
+    public mutating func back<E: Copyable>(_ element: E)
+    where Tag == Deque<E>.Push, Base == Deque<E> {
+        base.push(element, to: .back)
     }
 
     /// Pushes an element to the front of the deque.
@@ -76,7 +71,8 @@ extension Deque.Push where Element: Copyable {
     /// - Parameter element: The element to push.
     /// - Complexity: O(1) amortized.
     @inlinable
-    public mutating func front(_ element: Element) {
-        deque.push(element, to: .front)
+    public mutating func front<E: Copyable>(_ element: E)
+    where Tag == Deque<E>.Push, Base == Deque<E> {
+        base.push(element, to: .front)
     }
 }

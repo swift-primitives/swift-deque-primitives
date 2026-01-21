@@ -9,6 +9,15 @@
 //
 // ===----------------------------------------------------------------------===//
 
+// MARK: - Take Tag
+
+extension Deque where Element: Copyable {
+    /// Phantom tag for take (optional removal) operations.
+    ///
+    /// Used with ``Property`` to provide namespaced take properties.
+    public enum Take {}
+}
+
 // MARK: - Take Accessor (Copyable elements only)
 
 extension Deque where Element: Copyable {
@@ -17,7 +26,7 @@ extension Deque where Element: Copyable {
     /// Use `take` when empty is a normal state (queue/stack semantics):
     /// ```swift
     /// var queue: Deque<Int> = [1, 2, 3]
-    /// while let element = queue.take.front {
+    /// while let element = queue.take.back {
     ///     process(element)
     /// }
     /// ```
@@ -29,50 +38,33 @@ extension Deque where Element: Copyable {
     ///
     /// - Note: `_modify` only - no `get` accessor to prevent silent discard of mutations.
     @inlinable
-    public var take: Take {
+    public var take: PropertyOf<Take> {
         _read {
-            yield Take(deque: self)
+            yield Property.Of(self)
         }
         _modify {
             // Force uniqueness only (no growth needed for removal)
             makeUnique()
 
             // Transfer ownership to proxy
-            var proxy = Take(deque: self)
+            var property: PropertyOf<Take> = Property.Of(self)
             self = Deque()  // Clear self to release our reference
-            defer { self = proxy.deque }
-            yield &proxy
-        }
-    }
-}
-
-// MARK: - Take Type
-
-extension Deque where Element: Copyable {
-    /// Namespace for optional removal operations.
-    public struct Take {
-        @usableFromInline
-        var deque: Deque<Element>
-
-        @usableFromInline
-        init(deque: Deque<Element>) {
-            self.deque = deque
+            defer { self = property.base }
+            yield &property
         }
     }
 }
 
 // MARK: - Take Operations
 
-extension Deque.Take where Element: Copyable {
+extension Property.Of where Tag == Deque<Element>.Take, Base == Deque<Element>, Element: Copyable {
     /// Removes and returns the back element, or `nil` if empty.
     ///
     /// - Returns: The removed element, or `nil` if the deque is empty.
     /// - Complexity: O(1).
     @inlinable
     public var back: Element? {
-        mutating get {
-            deque.pop(from: .back)
-        }
+        mutating get { base.pop(from: .back) }
     }
 
     /// Removes and returns the front element, or `nil` if empty.
@@ -81,8 +73,6 @@ extension Deque.Take where Element: Copyable {
     /// - Complexity: O(1).
     @inlinable
     public var front: Element? {
-        mutating get {
-            deque.pop(from: .front)
-        }
+        mutating get { base.pop(from: .front) }
     }
 }

@@ -9,6 +9,15 @@
 //
 // ===----------------------------------------------------------------------===//
 
+// MARK: - Pop Tag
+
+extension Deque where Element: Copyable {
+    /// Phantom tag for pop operations.
+    ///
+    /// Used with ``Property`` to provide namespaced pop methods.
+    public enum Pop {}
+}
+
 // MARK: - Pop Accessor (Copyable elements only)
 
 extension Deque where Element: Copyable {
@@ -25,49 +34,35 @@ extension Deque where Element: Copyable {
     ///
     /// - Note: `_modify` only - no `get` accessor to prevent silent discard of mutations.
     @inlinable
-    public var pop: Pop {
+    public var pop: Property<Pop, Deque<Element>> {
         _read {
-            yield Pop(deque: self)
+            yield Property(self)
         }
         _modify {
             // Force uniqueness only (no growth needed for removal)
             makeUnique()
 
             // Transfer ownership to proxy
-            var proxy = Pop(deque: self)
+            var property: Property<Pop, Deque<Element>> = Property(self)
             self = Deque()  // Clear self to release our reference
-            defer { self = proxy.deque }
-            yield &proxy
-        }
-    }
-}
-
-// MARK: - Pop Type
-
-extension Deque where Element: Copyable {
-    /// Namespace for pop operations.
-    public struct Pop {
-        @usableFromInline
-        var deque: Deque<Element>
-
-        @usableFromInline
-        init(deque: Deque<Element>) {
-            self.deque = deque
+            defer { self = property.base }
+            yield &property
         }
     }
 }
 
 // MARK: - Pop Operations
 
-extension Deque.Pop where Element: Copyable {
+extension Property {
     /// Pops an element from the back of the deque.
     ///
     /// - Returns: The removed element.
     /// - Throws: `Deque.Error.empty` if the deque is empty.
     /// - Complexity: O(1).
     @inlinable
-    public mutating func back() throws(Deque<Element>.Error) -> Element {
-        guard let element = deque.pop(from: .back) else {
+    public mutating func back<E: Copyable>() throws(Deque<E>.Error) -> E
+    where Tag == Deque<E>.Pop, Base == Deque<E> {
+        guard let element = base.pop(from: .back) else {
             throw .empty
         }
         return element
@@ -79,8 +74,9 @@ extension Deque.Pop where Element: Copyable {
     /// - Throws: `Deque.Error.empty` if the deque is empty.
     /// - Complexity: O(1).
     @inlinable
-    public mutating func front() throws(Deque<Element>.Error) -> Element {
-        guard let element = deque.pop(from: .front) else {
+    public mutating func front<E: Copyable>() throws(Deque<E>.Error) -> E
+    where Tag == Deque<E>.Pop, Base == Deque<E> {
+        guard let element = base.pop(from: .front) else {
             throw .empty
         }
         return element
