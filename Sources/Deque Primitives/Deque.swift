@@ -1097,7 +1097,7 @@ extension Deque where Element: ~Copyable {
 // MARK: - Sequence (Copyable elements only)
 
 /// `Deque` conforms to `Sequence` when `Element` is `Copyable`.
-extension Deque: Sequence where Element: Copyable {
+extension Deque: Swift.Sequence where Element: Copyable {
 
     /// An iterator over the elements of a deque.
     public struct Iterator: IteratorProtocol {
@@ -1141,7 +1141,7 @@ extension Deque.Iterator: @unchecked Sendable where Element: Sendable {}
 
 // MARK: - Collection (Copyable elements only)
 
-extension Deque: Collection where Element: Copyable {
+extension Deque: Swift.Collection where Element: Copyable {
     /// Type-safe index for deque elements.
     ///
     /// Uses `Index<Element>` to provide compile-time safety preventing
@@ -1220,7 +1220,7 @@ extension Deque: MutableCollection where Element: Copyable {}
 // MARK: - Bounded Sequence (Copyable elements)
 
 /// `Deque.Bounded` conforms to `Sequence` when `Element` is `Copyable`.
-extension Deque.Bounded: Sequence where Element: Copyable {
+extension Deque.Bounded: Swift.Sequence where Element: Copyable {
 
     /// An iterator over the elements of a bounded deque.
     public struct Iterator: IteratorProtocol {
@@ -1422,7 +1422,7 @@ extension Deque where Element: Copyable {
     ///
     /// - Parameter elements: The sequence of elements.
     @inlinable
-    public init<S: Sequence>(_ elements: S) where S.Element == Element {
+    public init<S: Swift.Sequence>(_ elements: S) where S.Element == Element {
         self.init()
         for element in elements {
             push(element, to: .back)
