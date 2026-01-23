@@ -1256,6 +1256,87 @@ extension Deque.Bounded: Swift.Sequence where Element: Copyable {
     }
 }
 
+// MARK: - Bounded Collection (Copyable elements)
+
+extension Deque.Bounded: Swift.Collection where Element: Copyable {
+    /// Type-safe index for bounded deque elements.
+    ///
+    /// Uses `Index<Element>` to provide compile-time safety preventing
+    /// cross-collection index confusion.
+    public typealias Index = Index_Primitives.Index<Element>
+
+    @inlinable
+    public var startIndex: Index { .zero }
+
+    @inlinable
+    public var endIndex: Index { Index(__unchecked: (), position: count) }
+
+    @inlinable
+    public func index(after i: Index) -> Index {
+        // Force unwrap safe: Collection requires i != endIndex, so i+1 is always valid
+        (i + Index.Offset(1))!
+    }
+
+    /// Accesses the element at the specified index.
+    @inlinable
+    public subscript(index: Index) -> Element {
+        get {
+            precondition(index >= startIndex && index < endIndex, "Index out of bounds")
+            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
+            return unsafe _storage.withUnsafeMutablePointerToElements { elements in
+                unsafe elements[physicalIndex]
+            }
+        }
+        set {
+            precondition(index >= startIndex && index < endIndex, "Index out of bounds")
+            makeUnique()
+            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
+            unsafe _storage.withUnsafeMutablePointerToElements { elements in
+                unsafe (elements[physicalIndex] = newValue)
+            }
+        }
+    }
+}
+
+// MARK: - Bounded BidirectionalCollection
+
+extension Deque.Bounded: BidirectionalCollection where Element: Copyable {
+    @inlinable
+    public func index(before i: Index) -> Index {
+        // Force unwrap safe: BidirectionalCollection requires i != startIndex, so i-1 is always valid
+        (i - Index.Offset(1))!
+    }
+}
+
+// MARK: - Bounded RandomAccessCollection
+
+extension Deque.Bounded: RandomAccessCollection where Element: Copyable {
+    @inlinable
+    public func distance(from start: Index, to end: Index) -> Int {
+        (end.position - start.position).rawValue
+    }
+
+    @inlinable
+    public func index(_ i: Index, offsetBy distance: Int) -> Index {
+        // Force unwrap safe: Collection requires result be valid index; caller's precondition
+        (i + Index.Offset(distance))!
+    }
+
+    @inlinable
+    public func index(_ i: Index, offsetBy distance: Int, limitedBy limit: Index) -> Index? {
+        guard let result = i + Index.Offset(distance) else { return nil }
+        if distance >= 0 {
+            return result <= limit ? result : nil
+        } else {
+            return result >= limit ? result : nil
+        }
+    }
+}
+
+// MARK: - Bounded MutableCollection
+
+extension Deque.Bounded: MutableCollection where Element: Copyable {}
+
 // MARK: - Bounded Input Conformance
 // NOTE: Per [MEM-COPY-006], protocol conformances for nested types MUST be in the
 // same file as the type declaration to avoid breaking ~Copyable propagation.
@@ -1334,9 +1415,10 @@ extension Deque.Bounded: Input.`Protocol` where Element: Copyable {
 
 extension Deque.Bounded: Input.Access.Random where Element: Copyable {
     @inlinable
-    public subscript(offset offset: Int) -> Element {
-        precondition(offset >= 0 && offset < count, "Offset out of bounds")
-        let physicalIndex = _storage.physicalIndex(offset)
+    public subscript(offset offset: Index.Offset) -> Element {
+        let rawOffset = offset.rawValue
+        precondition(rawOffset >= 0 && rawOffset < count, "Offset out of bounds")
+        let physicalIndex = _storage.physicalIndex(rawOffset)
         return unsafe _storage.withUnsafeMutablePointerToElements { elements in
             unsafe elements[physicalIndex]
         }

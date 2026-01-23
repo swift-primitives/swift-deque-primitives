@@ -389,4 +389,65 @@ struct DequeTests {
         #expect(deque.capacity >= 1000)
         #expect(deque.capacity <= 2048)  // Reasonable growth (doubling)
     }
+
+    // MARK: - Bounded Collection Conformance
+
+    @Test("Bounded: Collection random access indexing")
+    func boundedRandomAccessIndexing() throws {
+        var deque = try Deque<Int>.Bounded(capacity: 10)
+        try deque.push(1, to: .back)
+        try deque.push(2, to: .back)
+        try deque.push(3, to: .back)
+
+        // Test subscript get
+        #expect(deque[0] == 1)
+        #expect(deque[1] == 2)
+        #expect(deque[2] == 3)
+
+        // Test subscript set
+        deque[1] = 20
+        #expect(deque[1] == 20)
+    }
+
+    @Test("Bounded: Collection iteration")
+    func boundedCollectionIteration() throws {
+        var deque = try Deque<Int>.Bounded(capacity: 5)
+        try deque.push(1, to: .back)
+        try deque.push(2, to: .back)
+        try deque.push(3, to: .back)
+
+        var result: [Int] = []
+        for element in deque {
+            result.append(element)
+        }
+        #expect(result == [1, 2, 3])
+    }
+
+    @Test("Bounded: BidirectionalCollection reversed")
+    func boundedBidirectionalIteration() throws {
+        var deque = try Deque<Int>.Bounded(capacity: 5)
+        try deque.push(1, to: .back)
+        try deque.push(2, to: .back)
+        try deque.push(3, to: .back)
+
+        #expect(Swift.Array(deque.reversed()) == [3, 2, 1])
+    }
+
+    @Test("Bounded: RandomAccessCollection distance and offset")
+    func boundedRandomAccessCollection() throws {
+        var deque = try Deque<Int>.Bounded(capacity: 10)
+        for i in 0..<5 {
+            try deque.push(i, to: .back)
+        }
+
+        let start = deque.startIndex
+        let end = deque.endIndex
+
+        // Test distance
+        #expect(deque.distance(from: start, to: end) == 5)
+
+        // Test index offsetBy
+        let middle = deque.index(start, offsetBy: 2)
+        #expect(deque[middle] == 2)
+    }
 }

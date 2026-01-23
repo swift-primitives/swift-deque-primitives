@@ -120,9 +120,10 @@ extension Deque: Input.Access.Random where Element: Copyable {
     /// - Parameter offset: Offset from current front (0-indexed).
     /// - Precondition: `offset >= 0` and `offset < count`.
     @inlinable
-    public subscript(offset offset: Int) -> Element {
-        precondition(offset >= 0 && offset < count, "Offset out of bounds")
-        return _readElement(at: offset)
+    public subscript(offset offset: Index.Offset) -> Element {
+        let rawOffset = offset.rawValue
+        precondition(rawOffset >= 0 && rawOffset < count, "Offset out of bounds")
+        return _readElement(at: rawOffset)
     }
 }
 
