@@ -186,22 +186,22 @@ extension Deque.Bounded where Element: ~Copyable {
     /// - ``Deque/Bounded/Error/bounds(index:count:)``: An index was out of bounds.
     public typealias Error = __Deque.Bounded.Error
 }
-//
-//extension Deque.Inline where Element: ~Copyable {
-//    /// Errors that can occur during inline deque operations.
-//    ///
-//    /// ## Cases
-//    ///
-//    /// - ``Deque/Inline/Error/overflow``: The deque is full and cannot accept more elements.
-//    /// - ``Deque/Inline/Error/empty``: An operation was attempted on an empty deque.
-//    public typealias Error = __Deque.Inline.Error
-//}
-//
-//extension Deque.Small where Element: ~Copyable {
-//    /// Errors that can occur during small deque operations.
-//    ///
-//    /// ## Cases
-//    ///
-//    /// - ``Deque/Small/Error/empty``: An operation was attempted on an empty deque.
-//    public typealias Error = __Deque.Small.Error
-//}
+
+extension Deque.Inline where Element: ~Copyable {
+    /// Errors that can occur during inline deque operations.
+    ///
+    /// ## Cases
+    ///
+    /// - ``Deque/Inline/Error/overflow``: The deque is full and cannot accept more elements.
+    /// - ``Deque/Inline/Error/empty``: An operation was attempted on an empty deque.
+    public typealias Error = __Deque.Inline.Error
+}
+
+extension Deque.Small where Element: ~Copyable {
+    /// Errors that can occur during small deque operations.
+    ///
+    /// ## Cases
+    ///
+    /// - ``Deque/Small/Error/empty``: An operation was attempted on an empty deque.
+    public typealias Error = __Deque.Small.Error
+}

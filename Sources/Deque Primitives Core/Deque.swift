@@ -1062,8 +1062,7 @@ extension Deque.Inline: @unchecked Sendable where Element: Sendable {}
 /// `Deque.Small` is `Sendable` when its elements are `Sendable`.
 extension Deque.Small: @unchecked Sendable where Element: Sendable {}
 
-/// `Deque.Storage` is `Sendable` when its elements are `Sendable`.
-extension Deque.Storage: @unchecked Sendable where Element: Sendable {}
+// Note: Deque.Storage inherits Sendable from ManagedBuffer superclass.
 
 // MARK: - Iteration (for ~Copyable elements)
 
@@ -1342,9 +1341,9 @@ extension Deque.Bounded: Input.Streaming where Element: Copyable {
 
     @inlinable
     @discardableResult
-    public mutating func advance() -> Element {
+    public mutating func advance() throws(Input.Stream.Error) -> Element {
         guard let element = pop(from: .front) else {
-            preconditionFailure("Cannot advance from empty deque")
+            throw .empty
         }
         return element
     }

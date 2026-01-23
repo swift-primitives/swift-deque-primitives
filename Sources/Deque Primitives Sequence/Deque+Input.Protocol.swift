@@ -26,12 +26,13 @@ extension Deque: Input.Streaming where Element: Copyable {
 
     /// Advances the cursor, returning the consumed element.
     ///
-    /// - Precondition: The deque must not be empty.
+    /// - Returns: The consumed element.
+    /// - Throws: ``Input/Stream/Error/empty`` if the deque is empty.
     @inlinable
     @discardableResult
-    public mutating func advance() -> Element {
+    public mutating func advance() throws(Input.Stream.Error) -> Element {
         guard let element = pop(from: .front) else {
-            preconditionFailure("Cannot advance from empty deque")
+            throw .empty
         }
         return element
     }
