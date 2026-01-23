@@ -11,6 +11,7 @@
 
 import Testing
 @testable import Deque_Primitives
+@testable import Deque_Primitives_Core
 
 @Suite("Deque")
 struct DequeTests {
