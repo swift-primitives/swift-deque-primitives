@@ -69,7 +69,7 @@ extension Deque: Input.`Protocol` where Element: Copyable {
     /// Creates a checkpoint at the current position.
     @inlinable
     public var checkpoint: Checkpoint {
-        Checkpoint(head: _storage.header.head, count: _storage.header.count)
+        Checkpoint(head: self._storage.header.head, count: _storage.header.count)
     }
 
     /// The range of valid checkpoint positions.
@@ -123,7 +123,7 @@ extension Deque: Input.Access.Random where Element: Copyable {
     public subscript(offset offset: Index.Offset) -> Element {
         let rawOffset = offset.rawValue
         precondition(rawOffset >= 0 && rawOffset < count, "Offset out of bounds")
-        return _readElement(at: rawOffset)
+        return self._readElement(at: rawOffset)
     }
 }
 
