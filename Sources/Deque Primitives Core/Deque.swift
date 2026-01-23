@@ -471,50 +471,50 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
 //        }
 //    }
 //
-//    // MARK: - Bounded
-//
-//    /// A fixed-capacity deque supporting move-only elements.
-//    ///
-//    /// `Deque.Bounded` allocates storage upfront and throws on overflow.
-//    /// Use this variant when capacity is known or in contexts requiring
-//    /// predictable memory behavior (embedded, real-time).
-//    ///
-//    /// ## Sequence Conformance
-//    ///
-//    /// When `Element` is `Copyable`, `Deque.Bounded` conforms to `Sequence`.
-//    ///
-//    /// ## Copy-on-Write
-//    ///
-//    /// When `Element` is `Copyable`, `Deque.Bounded` uses copy-on-write semantics.
-//    @safe
-//    public struct Bounded: ~Copyable {
-//        @usableFromInline
-//        var _storage: Storage  // Uses unified nested storage class
-//
-//        /// Cached pointer to element storage.
-//        @usableFromInline
-//        var _cachedPtr: UnsafeMutablePointer<Element>
-//
-//        /// The maximum number of elements the deque can hold.
-//        public let capacity: Int
-//
-//        /// Creates a deque with the specified capacity.
-//        ///
-//        /// - Parameter capacity: Maximum number of elements. Must be non-negative.
-//        /// - Throws: ``Deque/Bounded/Error/invalidCapacity`` if capacity is negative.
-//        @inlinable
-//        public init(capacity: Int) throws(__Deque.Bounded.Error) {
-//            guard capacity >= 0 else {
-//                throw .invalidCapacity
-//            }
-//
-//            self._storage = Storage.create(minimumCapacity: capacity)
-//            unsafe (self._cachedPtr = _storage._elementsPointer)
-//            self.capacity = capacity
-//        }
-//
-//        // Note: No deinit needed - Storage handles cleanup
-//    }
+    // MARK: - Bounded
+
+    /// A fixed-capacity deque supporting move-only elements.
+    ///
+    /// `Deque.Bounded` allocates storage upfront and throws on overflow.
+    /// Use this variant when capacity is known or in contexts requiring
+    /// predictable memory behavior (embedded, real-time).
+    ///
+    /// ## Sequence Conformance
+    ///
+    /// When `Element` is `Copyable`, `Deque.Bounded` conforms to `Sequence`.
+    ///
+    /// ## Copy-on-Write
+    ///
+    /// When `Element` is `Copyable`, `Deque.Bounded` uses copy-on-write semantics.
+    @safe
+    public struct Bounded: ~Copyable {
+        @usableFromInline
+        package var _storage: Storage  // Uses unified nested storage class
+
+        /// Cached pointer to element storage.
+        @usableFromInline
+        package var _cachedPtr: UnsafeMutablePointer<Element>
+
+        /// The maximum number of elements the deque can hold.
+        public let capacity: Int
+
+        /// Creates a deque with the specified capacity.
+        ///
+        /// - Parameter capacity: Maximum number of elements. Must be non-negative.
+        /// - Throws: ``Deque/Bounded/Error/invalidCapacity`` if capacity is negative.
+        @inlinable
+        public init(capacity: Int) throws(__Deque.Bounded.Error) {
+            guard capacity >= 0 else {
+                throw .invalidCapacity
+            }
+
+            self._storage = Storage.create(minimumCapacity: capacity)
+            unsafe (self._cachedPtr = _storage._elementsPointer)
+            self.capacity = capacity
+        }
+
+        // Note: No deinit needed - Storage handles cleanup
+    }
 
     // MARK: - Position
 
@@ -565,140 +565,140 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
 /// `Deque` is `Copyable` when its elements are `Copyable`.
 extension Deque: Copyable where Element: Copyable {}
 
-///// `Deque.Bounded` is `Copyable` when its elements are `Copyable`.
-//extension Deque.Bounded: Copyable where Element: Copyable {}
+/// `Deque.Bounded` is `Copyable` when its elements are `Copyable`.
+extension Deque.Bounded: Copyable where Element: Copyable {}
 //
-//// Note: Deque.Inline and Deque.Small are UNCONDITIONALLY ~Copyable due to deinit requirement
-//
-//// MARK: - Bounded Properties
-//
-//extension Deque.Bounded where Element: ~Copyable {
-//    /// The current number of elements in the deque.
-//    @inlinable
-//    public var count: Int { _storage.header.count }
-//
-//    /// Whether the deque is empty.
-//    @inlinable
-//    public var isEmpty: Bool { _storage.header.count == 0 }
-//
-//    /// Whether the deque is full.
-//    @inlinable
-//    public var isFull: Bool { _storage.header.count == capacity }
-//}
-//
-//// MARK: - Bounded Core Operations (Base - for ~Copyable elements)
-//
-//extension Deque.Bounded where Element: ~Copyable {
-//    /// Pushes an element to the specified end of the deque.
-//    ///
-//    /// - Parameters:
-//    ///   - element: The element to push.
-//    ///   - position: Which end to push to (.front or .back).
-//    /// - Throws: ``Deque/Bounded/Error/overflow`` if the deque is full.
-//    /// - Complexity: O(1)
-//    @inlinable
-//    public mutating func push(_ element: consuming Element, to position: Deque<Element>.Position) throws(Deque<Element>.Bounded.Error) {
-//        guard !isFull else {
-//            throw .overflow
-//        }
-//        switch position {
-//        case .front:
-//            _storage.prepend(element)
-//        case .back:
-//            _storage.append(element)
-//        }
-//    }
-//
-//    /// Pops and returns an element from the specified end, or nil if empty.
-//    ///
-//    /// - Parameter position: Which end to pop from (.front or .back).
-//    /// - Returns: The removed element, or `nil` if the deque is empty.
-//    /// - Complexity: O(1)
-//    @inlinable
-//    public mutating func pop(from position: Deque<Element>.Position) -> Element? {
-//        guard !isEmpty else { return nil }
-//        switch position {
-//        case .front:
-//            return _storage.removeFirst()
-//        case .back:
-//            return _storage.removeLast()
-//        }
-//    }
-//
-//    /// Takes and returns an element from the specified end, or nil if empty.
-//    ///
-//    /// - Parameter position: Which end to take from (.front or .back).
-//    /// - Returns: The removed element, or `nil` if the deque is empty.
-//    /// - Complexity: O(1)
-//    @inlinable
-//    public mutating func take(from position: Deque<Element>.Position) -> Element? {
-//        pop(from: position)
-//    }
-//
-//    /// Removes all elements from the deque.
-//    ///
-//    /// The capacity remains unchanged.
-//    ///
-//    /// - Complexity: O(n) where n is the number of elements.
-//    @inlinable
-//    public mutating func clear() {
-//        _storage.deinitializeAll()
-//    }
-//}
-//
-//// MARK: - Bounded Copy-on-Write (Copyable elements only)
-//
-//extension Deque.Bounded where Element: Copyable {
-//    /// Ensures the storage is uniquely referenced before mutation.
-//    @usableFromInline
-//    mutating func makeUnique() {
-//        if !isKnownUniquelyReferenced(&_storage) {
-//            _storage = _storage.copy()
-//            unsafe _cachedPtr = _storage._elementsPointer
-//        }
-//    }
-//
-//    /// Pushes an element to the specified end of the deque (CoW-aware).
-//    @inlinable
-//    public mutating func push(_ element: Element, to position: Deque<Element>.Position) throws(Deque<Element>.Bounded.Error) {
-//        makeUnique()
-//        guard !isFull else {
-//            throw .overflow
-//        }
-//        switch position {
-//        case .front:
-//            _storage.prepend(element)
-//        case .back:
-//            _storage.append(element)
-//        }
-//    }
-//
-//    /// Pops and returns an element from the specified end (CoW-aware).
-//    @inlinable
-//    public mutating func pop(from position: Deque<Element>.Position) -> Element? {
-//        makeUnique()
-//        guard !isEmpty else { return nil }
-//        switch position {
-//        case .front:
-//            return _storage.removeFirst()
-//        case .back:
-//            return _storage.removeLast()
-//        }
-//    }
-//
-//    /// Takes and returns an element from the specified end (CoW-aware).
-//    @inlinable
-//    public mutating func take(from position: Deque<Element>.Position) -> Element? {
-//        pop(from: position)
-//    }
-//
-//    /// Removes all elements from the deque (CoW-aware).
-//    @inlinable
-//    public mutating func clear() {
-//        makeUnique()
-//        _storage.deinitializeAll()
-//    }
-//}
+// Note: Deque.Inline and Deque.Small are UNCONDITIONALLY ~Copyable due to deinit requirement
+
+// MARK: - Bounded Properties
+
+extension Deque.Bounded where Element: ~Copyable {
+    /// The current number of elements in the deque.
+    @inlinable
+    public var count: Int { _storage.header.count }
+
+    /// Whether the deque is empty.
+    @inlinable
+    public var isEmpty: Bool { _storage.header.count == 0 }
+
+    /// Whether the deque is full.
+    @inlinable
+    public var isFull: Bool { _storage.header.count == capacity }
+}
+
+// MARK: - Bounded Core Operations (Base - for ~Copyable elements)
+
+extension Deque.Bounded where Element: ~Copyable {
+    /// Pushes an element to the specified end of the deque.
+    ///
+    /// - Parameters:
+    ///   - element: The element to push.
+    ///   - position: Which end to push to (.front or .back).
+    /// - Throws: ``Deque/Bounded/Error/overflow`` if the deque is full.
+    /// - Complexity: O(1)
+    @inlinable
+    public mutating func push(_ element: consuming Element, to position: Deque<Element>.Position) throws(Deque<Element>.Bounded.Error) {
+        guard !isFull else {
+            throw .overflow
+        }
+        switch position {
+        case .front:
+            _storage.prepend(element)
+        case .back:
+            _storage.append(element)
+        }
+    }
+
+    /// Pops and returns an element from the specified end, or nil if empty.
+    ///
+    /// - Parameter position: Which end to pop from (.front or .back).
+    /// - Returns: The removed element, or `nil` if the deque is empty.
+    /// - Complexity: O(1)
+    @inlinable
+    public mutating func pop(from position: Deque<Element>.Position) -> Element? {
+        guard !isEmpty else { return nil }
+        switch position {
+        case .front:
+            return _storage.removeFirst()
+        case .back:
+            return _storage.removeLast()
+        }
+    }
+
+    /// Takes and returns an element from the specified end, or nil if empty.
+    ///
+    /// - Parameter position: Which end to take from (.front or .back).
+    /// - Returns: The removed element, or `nil` if the deque is empty.
+    /// - Complexity: O(1)
+    @inlinable
+    public mutating func take(from position: Deque<Element>.Position) -> Element? {
+        pop(from: position)
+    }
+
+    /// Removes all elements from the deque.
+    ///
+    /// The capacity remains unchanged.
+    ///
+    /// - Complexity: O(n) where n is the number of elements.
+    @inlinable
+    public mutating func clear() {
+        _storage.deinitializeAll()
+    }
+}
+
+// MARK: - Bounded Copy-on-Write (Copyable elements only)
+
+extension Deque.Bounded where Element: Copyable {
+    /// Ensures the storage is uniquely referenced before mutation.
+    @usableFromInline
+    package mutating func makeUnique() {
+        if !isKnownUniquelyReferenced(&_storage) {
+            _storage = _storage.copy()
+            unsafe _cachedPtr = _storage._elementsPointer
+        }
+    }
+
+    /// Pushes an element to the specified end of the deque (CoW-aware).
+    @inlinable
+    public mutating func push(_ element: Element, to position: Deque<Element>.Position) throws(Deque<Element>.Bounded.Error) {
+        makeUnique()
+        guard !isFull else {
+            throw .overflow
+        }
+        switch position {
+        case .front:
+            _storage.prepend(element)
+        case .back:
+            _storage.append(element)
+        }
+    }
+
+    /// Pops and returns an element from the specified end (CoW-aware).
+    @inlinable
+    public mutating func pop(from position: Deque<Element>.Position) -> Element? {
+        makeUnique()
+        guard !isEmpty else { return nil }
+        switch position {
+        case .front:
+            return _storage.removeFirst()
+        case .back:
+            return _storage.removeLast()
+        }
+    }
+
+    /// Takes and returns an element from the specified end (CoW-aware).
+    @inlinable
+    public mutating func take(from position: Deque<Element>.Position) -> Element? {
+        pop(from: position)
+    }
+
+    /// Removes all elements from the deque (CoW-aware).
+    @inlinable
+    public mutating func clear() {
+        makeUnique()
+        _storage.deinitializeAll()
+    }
+}
 //
 //// MARK: - Bounded Peek
 //

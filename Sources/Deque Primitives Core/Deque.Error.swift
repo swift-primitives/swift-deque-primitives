@@ -169,23 +169,23 @@ extension __Deque.Small.Error: CustomStringConvertible {
         }
     }
 }
+
+// MARK: - Variant Error Typealiases (Nest.Name API)
 //
-//// MARK: - Variant Error Typealiases (Nest.Name API)
-////
-//// IMPORTANT: Extensions MUST include `where Element: ~Copyable` to prevent
-//// implicit Copyable constraint. This is a documented Swift compiler limitation.
-//
-//extension Deque.Bounded where Element: ~Copyable {
-//    /// Errors that can occur during bounded deque operations.
-//    ///
-//    /// ## Cases
-//    ///
-//    /// - ``Deque/Bounded/Error/invalidCapacity``: The requested capacity is invalid (negative).
-//    /// - ``Deque/Bounded/Error/overflow``: The deque is full and cannot accept more elements.
-//    /// - ``Deque/Bounded/Error/empty``: An operation was attempted on an empty deque.
-//    /// - ``Deque/Bounded/Error/bounds(index:count:)``: An index was out of bounds.
-//    public typealias Error = __Deque.Bounded.Error
-//}
+// IMPORTANT: Extensions MUST include `where Element: ~Copyable` to prevent
+// implicit Copyable constraint. This is a documented Swift compiler limitation.
+
+extension Deque.Bounded where Element: ~Copyable {
+    /// Errors that can occur during bounded deque operations.
+    ///
+    /// ## Cases
+    ///
+    /// - ``Deque/Bounded/Error/invalidCapacity``: The requested capacity is invalid (negative).
+    /// - ``Deque/Bounded/Error/overflow``: The deque is full and cannot accept more elements.
+    /// - ``Deque/Bounded/Error/empty``: An operation was attempted on an empty deque.
+    /// - ``Deque/Bounded/Error/bounds(index:count:)``: An index was out of bounds.
+    public typealias Error = __Deque.Bounded.Error
+}
 //
 //extension Deque.Inline where Element: ~Copyable {
 //    /// Errors that can occur during inline deque operations.
