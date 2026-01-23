@@ -24,13 +24,31 @@ let package = Package(
         .package(path: "../swift-collection-primitives"),
     ],
     targets: [
+        // Internal: Core types with ~Copyable support (no Sequence/Collection.Protocol conformances)
         .target(
-            name: "Deque Primitives",
+            name: "Deque Primitives Core",
             dependencies: [
                 .product(name: "Property Primitives", package: "swift-property-primitives"),
                 .product(name: "Index Primitives", package: "swift-index-primitives"),
                 .product(name: "Input Primitives", package: "swift-input-primitives"),
                 .product(name: "Collection Primitives", package: "swift-collection-primitives"),
+            ]
+        ),
+        // Internal: Sequence/Collection.Protocol conformances (Element: Copyable)
+        // Separate module to avoid constraint poisoning on Core types
+        .target(
+            name: "Deque Primitives Sequence",
+            dependencies: [
+                "Deque Primitives Core",
+                .product(name: "Collection Primitives", package: "swift-collection-primitives"),
+            ]
+        ),
+        // Public: Re-exports Core and Sequence for users
+        .target(
+            name: "Deque Primitives",
+            dependencies: [
+                "Deque Primitives Core",
+                "Deque Primitives Sequence",
             ]
         ),
         .testTarget(

@@ -496,7 +496,6 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
 
         /// Cached pointer to element storage.
         @usableFromInline
-        @unsafe
         var _cachedPtr: UnsafeMutablePointer<Element>
 
         /// The maximum number of elements the deque can hold.
@@ -1192,19 +1191,19 @@ extension Deque: BidirectionalCollection where Element: Copyable {
 
 extension Deque: RandomAccessCollection where Element: Copyable {
     @inlinable
-    public func distance(from start: Index, to end: Index) -> Int {
+    public func distance(from start: Deque<Element>.Index, to end: Deque<Element>.Index) -> Int {
         (end.position - start.position).rawValue
     }
 
     @inlinable
-    public func index(_ i: Index, offsetBy distance: Int) -> Index {
+    public func index(_ i: Deque<Element>.Index, offsetBy distance: Int) -> Deque<Element>.Index {
         // Force unwrap safe: Collection requires result be valid index; caller's precondition
-        (i + Index.Offset(distance))!
+        (i + Deque<Element>.Index.Offset(distance))!
     }
 
     @inlinable
-    public func index(_ i: Index, offsetBy distance: Int, limitedBy limit: Index) -> Index? {
-        guard let result = i + Index.Offset(distance) else { return nil }
+    public func index(_ i: Deque<Element>.Index, offsetBy distance: Int, limitedBy limit: Deque<Element>.Index) -> Deque<Element>.Index? {
+        guard let result = i + Deque<Element>.Index.Offset(distance) else { return nil }
         if distance >= 0 {
             return result <= limit ? result : nil
         } else {
@@ -1312,19 +1311,19 @@ extension Deque.Bounded: BidirectionalCollection where Element: Copyable {
 
 extension Deque.Bounded: RandomAccessCollection where Element: Copyable {
     @inlinable
-    public func distance(from start: Index, to end: Index) -> Int {
+    public func distance(from start: Deque<Element>.Index, to end: Deque<Element>.Index) -> Int {
         (end.position - start.position).rawValue
     }
 
     @inlinable
-    public func index(_ i: Index, offsetBy distance: Int) -> Index {
+    public func index(_ i: Deque<Element>.Index, offsetBy distance: Int) -> Deque<Element>.Index {
         // Force unwrap safe: Collection requires result be valid index; caller's precondition
-        (i + Index.Offset(distance))!
+        (i + Deque<Element>.Index.Offset(distance))!
     }
 
     @inlinable
-    public func index(_ i: Index, offsetBy distance: Int, limitedBy limit: Index) -> Index? {
-        guard let result = i + Index.Offset(distance) else { return nil }
+    public func index(_ i: Deque<Element>.Index, offsetBy distance: Int, limitedBy limit: Deque<Element>.Index) -> Deque<Element>.Index? {
+        guard let result = i + Deque<Element>.Index.Offset(distance) else { return nil }
         if distance >= 0 {
             return result <= limit ? result : nil
         } else {
@@ -1415,7 +1414,7 @@ extension Deque.Bounded: Input.`Protocol` where Element: Copyable {
 
 extension Deque.Bounded: Input.Access.Random where Element: Copyable {
     @inlinable
-    public subscript(offset offset: Index.Offset) -> Element {
+    public subscript(offset offset: Deque<Element>.Index.Offset) -> Element {
         let rawOffset = offset.rawValue
         precondition(rawOffset >= 0 && rawOffset < count, "Offset out of bounds")
         let physicalIndex = _storage.physicalIndex(rawOffset)
@@ -1539,7 +1538,7 @@ extension Deque where Element: Copyable {
     /// - Returns: The element at the index.
     /// - Throws: `Deque.Error.bounds` if the index is out of bounds.
     @inlinable
-    public func element(at index: Index) throws(Deque<Element>.Error) -> Element {
+    public func element(at index: Deque<Element>.Index) throws(Deque<Element>.Error) -> Element {
         guard index >= startIndex && index < endIndex else {
             throw .bounds(index: index.position.rawValue, count: count)
         }
