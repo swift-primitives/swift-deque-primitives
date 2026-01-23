@@ -10,7 +10,6 @@
 // ===----------------------------------------------------------------------===//
 
 public import Index_Primitives
-public import Input_Primitives
 
 /// Double-ended queue with O(1) amortized operations at both ends.
 ///
@@ -1139,14 +1138,10 @@ extension Deque: Swift.Sequence where Element: Copyable {
 extension Deque.Iterator: @unchecked Sendable where Element: Sendable {}
 
 // MARK: - Collection (Copyable elements only)
+// Note: Index typealias is defined in Deque.Index.swift for ~Copyable elements
+// Note: subscript is defined in Deque.Index.swift with _read/_modify accessors
 
 extension Deque: Swift.Collection where Element: Copyable {
-    /// Type-safe index for deque elements.
-    ///
-    /// Uses `Index<Element>` to provide compile-time safety preventing
-    /// cross-collection index confusion.
-    public typealias Index = Index_Primitives.Index<Element>
-
     @inlinable
     public var startIndex: Index { .zero }
 
@@ -1157,23 +1152,6 @@ extension Deque: Swift.Collection where Element: Copyable {
     public func index(after i: Index) -> Index {
         // Force unwrap safe: Collection requires i != endIndex, so i+1 is always valid
         (i + Index.Offset(1))!
-    }
-
-    /// Accesses the element at the specified index.
-    @inlinable
-    public subscript(index: Index) -> Element {
-        get {
-            precondition(index >= startIndex && index < endIndex, "Index out of bounds")
-            return _readElement(at: index.position.rawValue)
-        }
-        set {
-            precondition(index >= startIndex && index < endIndex, "Index out of bounds")
-            makeUnique()
-            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
-            unsafe _storage.withUnsafeMutablePointerToElements { elements in
-                unsafe (elements[physicalIndex] = newValue)
-            }
-        }
     }
 }
 
@@ -1256,13 +1234,11 @@ extension Deque.Bounded: Swift.Sequence where Element: Copyable {
 }
 
 // MARK: - Bounded Collection (Copyable elements)
+// Note: Index typealias uses Deque<Element>.Index from Deque.Index.swift
+// Note: subscript is defined in Deque.Index.swift with _read/_modify accessors
 
 extension Deque.Bounded: Swift.Collection where Element: Copyable {
-    /// Type-safe index for bounded deque elements.
-    ///
-    /// Uses `Index<Element>` to provide compile-time safety preventing
-    /// cross-collection index confusion.
-    public typealias Index = Index_Primitives.Index<Element>
+    public typealias Index = Deque<Element>.Index
 
     @inlinable
     public var startIndex: Index { .zero }
@@ -1274,26 +1250,6 @@ extension Deque.Bounded: Swift.Collection where Element: Copyable {
     public func index(after i: Index) -> Index {
         // Force unwrap safe: Collection requires i != endIndex, so i+1 is always valid
         (i + Index.Offset(1))!
-    }
-
-    /// Accesses the element at the specified index.
-    @inlinable
-    public subscript(index: Index) -> Element {
-        get {
-            precondition(index >= startIndex && index < endIndex, "Index out of bounds")
-            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
-            return unsafe _storage.withUnsafeMutablePointerToElements { elements in
-                unsafe elements[physicalIndex]
-            }
-        }
-        set {
-            precondition(index >= startIndex && index < endIndex, "Index out of bounds")
-            makeUnique()
-            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
-            unsafe _storage.withUnsafeMutablePointerToElements { elements in
-                unsafe (elements[physicalIndex] = newValue)
-            }
-        }
     }
 }
 
