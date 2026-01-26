@@ -393,7 +393,7 @@ struct DequeTests {
 
     // MARK: - Bounded Collection Conformance
 
-    @Test("Bounded: Collection random access indexing")
+    @Test("Bounded: Swift.Collection random access indexing")
     func boundedRandomAccessIndexing() throws {
         var deque = try Deque<Int>.Bounded(capacity: 10)
         try deque.push(1, to: .back)
@@ -410,7 +410,7 @@ struct DequeTests {
         #expect(deque[1] == 20)
     }
 
-    @Test("Bounded: Collection iteration")
+    @Test("Bounded: Swift.Collection iteration")
     func boundedCollectionIteration() throws {
         var deque = try Deque<Int>.Bounded(capacity: 5)
         try deque.push(1, to: .back)

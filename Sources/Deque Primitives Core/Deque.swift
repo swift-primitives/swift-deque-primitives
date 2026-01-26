@@ -503,7 +503,7 @@ public struct Deque<Element: ~Copyable>: ~Copyable {
         /// - Parameter capacity: Maximum number of elements. Must be non-negative.
         /// - Throws: ``Deque/Bounded/Error/invalidCapacity`` if capacity is negative.
         @inlinable
-        public init(capacity: Int) throws(__Deque.Bounded.Error) {
+        public init(capacity: Int) throws(Deque.Bounded.Error) {
             guard capacity >= 0 else {
                 throw .invalidCapacity
             }
@@ -801,16 +801,6 @@ extension Deque.Bounded where Element: Copyable {
         }
         _storage.header.count = targetCount
     }
-}
-
-// MARK: - End (Backwards Compatibility)
-
-extension Deque where Element: ~Copyable {
-    /// Which end of the deque to operate on.
-    ///
-    /// - Note: Deprecated. Use ``Position`` instead.
-    @available(*, deprecated, renamed: "Position")
-    public typealias End = Position
 }
 
 // MARK: - Properties
@@ -1147,7 +1137,7 @@ extension Deque: Swift.Collection where Element: Copyable {
 
     @inlinable
     public func index(after i: Index) -> Index {
-        // Force unwrap safe: Collection requires i != endIndex, so i+1 is always valid
+        // Force unwrap safe: Swift.Collection requires i != endIndex, so i+1 is always valid
         (i + Index.Offset(1))!
     }
 }
@@ -1172,7 +1162,7 @@ extension Deque: RandomAccessCollection where Element: Copyable {
 
     @inlinable
     public func index(_ i: Deque<Element>.Index, offsetBy distance: Int) -> Deque<Element>.Index {
-        // Force unwrap safe: Collection requires result be valid index; caller's precondition
+        // Force unwrap safe: Swift.Collection requires result be valid index; caller's precondition
         (i + Deque<Element>.Index.Offset(distance))!
     }
 
@@ -1282,7 +1272,7 @@ extension Deque.Bounded: Swift.Collection where Element: Copyable {
 
     @inlinable
     public func index(after i: Index) -> Index {
-        // Force unwrap safe: Collection requires i != endIndex, so i+1 is always valid
+        // Force unwrap safe: Swift.Collection requires i != endIndex, so i+1 is always valid
         (i + Index.Offset(1))!
     }
 }
@@ -1307,7 +1297,7 @@ extension Deque.Bounded: RandomAccessCollection where Element: Copyable {
 
     @inlinable
     public func index(_ i: Deque<Element>.Index, offsetBy distance: Int) -> Deque<Element>.Index {
-        // Force unwrap safe: Collection requires result be valid index; caller's precondition
+        // Force unwrap safe: Swift.Collection requires result be valid index; caller's precondition
         (i + Deque<Element>.Index.Offset(distance))!
     }
 

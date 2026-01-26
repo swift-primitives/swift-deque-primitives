@@ -41,7 +41,7 @@ extension Deque.Inline where Element: ~Copyable {
     /// - Throws: ``Deque/Inline/Error/overflow`` if the deque is full.
     /// - Complexity: O(1)
     @inlinable
-    public mutating func push(_ element: consuming Element, to position: Deque<Element>.Position) throws(__Deque.Inline.Error) {
+    public mutating func push(_ element: consuming Element, to position: Deque<Element>.Position) throws(Deque.Inline.Error) {
         guard _count < Self.capacity else {
             throw .overflow
         }
