@@ -1232,14 +1232,14 @@ extension Deque.Bounded where Element: Copyable {
     @inlinable
     public subscript(index: Deque<Element>.Index) -> Element {
         _read {
-            precondition(index >= .zero && index.position.rawValue < count, "Index out of bounds")
-            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
+            precondition(index >= .zero && index.position < count, "Index out of bounds")
+            let physicalIndex = _storage.physicalIndex(index.position)
             yield unsafe _cachedPtr[physicalIndex]
         }
         _modify {
             makeUnique()
-            precondition(index >= .zero && index.position.rawValue < count, "Index out of bounds")
-            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
+            precondition(index >= .zero && index.position < count, "Index out of bounds")
+            let physicalIndex = _storage.physicalIndex(index.position)
             yield &(unsafe _cachedPtr[physicalIndex])
         }
     }
@@ -1250,8 +1250,8 @@ extension Deque.Bounded where Element: Copyable {
     /// - Returns: The element at the index, or `nil` if out of bounds.
     @inlinable
     public func element(at index: Deque<Element>.Index) -> Element? {
-        guard index >= .zero && index.position.rawValue < count else { return nil }
-        let physicalIndex = _storage.physicalIndex(index.position.rawValue)
+        guard index >= .zero && index.position < count else { return nil }
+        let physicalIndex = _storage.physicalIndex(index.position)
         return unsafe _storage.withUnsafeMutablePointerToElements { elements in
             unsafe elements[physicalIndex]
         }
@@ -1520,9 +1520,9 @@ extension Deque where Element: Copyable {
     @inlinable
     public func element(at index: Deque<Element>.Index) throws(Deque<Element>.Error) -> Element {
         guard index >= startIndex && index < endIndex else {
-            throw .bounds(index: index.position.rawValue, count: count)
+            throw .bounds(index: index.position, count: count)
         }
-        return _readElement(at: index.position.rawValue)
+        return _readElement(at: index.position)
     }
 }
 

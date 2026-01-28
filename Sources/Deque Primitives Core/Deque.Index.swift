@@ -34,13 +34,13 @@ extension Deque where Element: ~Copyable {
     @inlinable
     public subscript(index: Index) -> Element {
         _read {
-            precondition(index >= .zero && index.position.rawValue < count, "Index out of bounds")
-            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
+            precondition(index >= .zero && index.position < count, "Index out of bounds")
+            let physicalIndex = _storage.physicalIndex(index.position)
             yield unsafe _cachedPtr[physicalIndex]
         }
         _modify {
-            precondition(index >= .zero && index.position.rawValue < count, "Index out of bounds")
-            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
+            precondition(index >= .zero && index.position < count, "Index out of bounds")
+            let physicalIndex = _storage.physicalIndex(index.position)
             yield &(unsafe _cachedPtr[physicalIndex])
         }
     }
@@ -54,13 +54,13 @@ extension Deque where Element: Copyable {
     @inlinable
     public subscript(index: Index) -> Element {
         _read {
-            precondition(index >= .zero && index.position.rawValue < count, "Index out of bounds")
-            yield _readElement(at: index.position.rawValue)
+            precondition(index >= .zero && index.position < count, "Index out of bounds")
+            yield _readElement(at: index.position)
         }
         _modify {
             makeUnique()
-            precondition(index >= .zero && index.position.rawValue < count, "Index out of bounds")
-            let physicalIndex = _storage.physicalIndex(index.position.rawValue)
+            precondition(index >= .zero && index.position < count, "Index out of bounds")
+            let physicalIndex = _storage.physicalIndex(index.position)
             yield &(unsafe _cachedPtr[physicalIndex])
         }
     }

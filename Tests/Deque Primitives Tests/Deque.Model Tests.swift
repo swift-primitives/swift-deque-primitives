@@ -47,7 +47,7 @@ struct DequeModelTests {
         }
 
         subscript(index: Index<Int>) -> Element {
-            elements[index.position.rawValue]
+            elements[index.position]
         }
     }
 
