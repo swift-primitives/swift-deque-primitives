@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 import Testing
-@testable import Deque_Primitives
+@testable import Queue_Primitives
 
 /// Tests verifying Deque.Small inline-to-heap spill behavior.
 /// Migrated from: Experiments/deque-small-spill

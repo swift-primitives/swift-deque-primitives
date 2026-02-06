@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 import Testing
-@testable import Deque_Primitives
+@testable import Queue_Primitives
 
 /// Tests verifying Sendable conformance when Element: Sendable.
 /// Migrated from: Experiments/deque-sendable-conformance

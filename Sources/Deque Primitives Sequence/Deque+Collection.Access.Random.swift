@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import Collection_Primitives
-public import Deque_Primitives_Core
+public import Queue_Primitives_Core
 public import Index_Primitives
 
 // Temporarily empty - testing build issues

@@ -11,7 +11,7 @@
 
 import Testing
 import Synchronization
-@testable import Deque_Primitives
+@testable import Queue_Primitives
 
 /// Tests verifying deinit order (front-to-back) for all Deque variants.
 /// Migrated from: Experiments/deque-deinit-order

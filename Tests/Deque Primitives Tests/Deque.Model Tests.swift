@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 import Testing
-@testable import Deque_Primitives
+@testable import Queue_Primitives
 
 @Suite("Deque - Model Tests")
 struct DequeModelTests {

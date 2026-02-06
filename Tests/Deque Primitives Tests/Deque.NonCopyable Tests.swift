@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 import Testing
-@testable import Deque_Primitives
+@testable import Queue_Primitives
 
 /// Tests verifying ~Copyable element support across all Deque variants.
 /// Migrated from: Experiments/deque-noncopyable-elements

@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 import Testing
-@testable import Deque_Primitives
+@testable import Queue_Primitives
 
 /// Tests verifying conditional Copyable conformance.
 /// - Deque<Copyable> is Copyable
