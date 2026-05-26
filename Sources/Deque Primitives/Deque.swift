@@ -9,7 +9,7 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import Queue_Primitives_Core
+public import Queue_DoubleEnded_Primitives
 
 /// A double-ended queue: a first-class alias for ``Queue/DoubleEnded``.
 ///
