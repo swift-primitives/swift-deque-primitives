@@ -22,11 +22,11 @@ let package = Package(
         .library(name: "Queue DoubleEnded Primitives Test Support", targets: ["Queue DoubleEnded Primitives Test Support"]),
     ],
     dependencies: [
-        .package(path: "../swift-queue-primitives"),
-        .package(path: "../swift-buffer-ring-primitives"),
-        .package(path: "../swift-buffer-linear-primitives"),
-        .package(path: "../swift-property-primitives"),
-        .package(path: "../swift-index-primitives"),
+        .package(url: "https://github.com/swift-primitives/swift-queue-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-buffer-ring-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-buffer-linear-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-property-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-index-primitives.git", branch: "main"),
     ],
     targets: [
 
