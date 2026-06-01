@@ -6,4 +6,4 @@
 // package-name-facing `Deque Primitives` module.
 
 @_exported public import Queue_DoubleEnded_Primitive
-@_exported public import Queue_Primitives_Core
+@_exported public import Queue_Primitives

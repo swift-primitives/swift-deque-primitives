@@ -9,7 +9,7 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import Queue_Primitives_Core
+public import Queue_Primitives
 
 extension Queue.DoubleEnded.Fixed where Element: ~Copyable {
     /// Errors that can occur during fixed-capacity double-ended queue operations.

@@ -13,7 +13,7 @@ public import Buffer_Ring_Primitive
 public import Buffer_Ring_Primitives
 public import Buffer_Ring_Inline_Primitives
 public import Queue_DoubleEnded_Primitive
-public import Queue_Primitives_Core
+public import Queue_Primitives
 
 // Note: Queue.DoubleEnded struct declaration is in Queue.swift
 // (must be same file due to Swift compiler bug [MEM-COPY-006])
@@ -519,38 +519,10 @@ extension Queue.DoubleEnded.Small {
     }
 }
 
-// MARK: - Sequence (Copyable)
-
-extension Queue.DoubleEnded: Swift.Sequence where Element: Copyable {
-    /// An iterator over the elements of a double-ended queue.
-    public struct Iterator: Sequence.Iterator.`Protocol`, IteratorProtocol {
-        @usableFromInline
-        var _inner: Buffer<Element>.Ring.Iterator
-
-        @usableFromInline
-        init(_inner: Buffer<Element>.Ring.Iterator) {
-            self._inner = _inner
-        }
-
-        @_lifetime(&self)
-        @inlinable
-        public mutating func nextSpan(maximumCount: Cardinal) -> Span<Element> {
-            _inner.nextSpan(maximumCount: maximumCount)
-        }
-
-        @inlinable
-        public mutating func next() -> Element? {
-            _inner.next()
-        }
-    }
-
-    @inlinable
-    public func makeIterator() -> Iterator {
-        Iterator(_inner: _buffer.makeIterator())
-    }
-}
-
-extension Queue.DoubleEnded.Iterator: Sendable where Element: Sendable {}
+// Note: the base `Swift.Sequence` conformance + nested `struct Iterator` are dropped per the
+// recipe-2 migration (the deferred stdlib-interop axis). Element iteration is via the institute
+// `Iterable` + `Sequenceable` attachables in the type module
+// (Queue.DoubleEnded+Iterable.swift / Queue.DoubleEnded+Sequenceable.swift).
 
 // MARK: - Equatable (Copyable)
 

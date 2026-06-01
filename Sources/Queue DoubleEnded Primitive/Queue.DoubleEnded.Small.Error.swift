@@ -9,7 +9,7 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import Queue_Primitives_Core
+public import Queue_Primitives
 
 extension Queue.DoubleEnded.Small {
     /// Errors that can occur during small double-ended queue operations.

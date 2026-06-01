@@ -9,7 +9,7 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import Queue_Primitives_Core
+public import Queue_Primitives
 
 extension Queue.DoubleEnded.Static {
     /// Errors that can occur during static double-ended queue operations.

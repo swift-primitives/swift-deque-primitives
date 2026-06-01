@@ -27,6 +27,8 @@ let package = Package(
         .package(url: "https://github.com/swift-primitives/swift-buffer-linear-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-property-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-index-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-iterator-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-sequence-primitives.git", branch: "main"),
     ],
     targets: [
 
@@ -35,12 +37,17 @@ let package = Package(
         .target(
             name: "Queue DoubleEnded Primitive",
             dependencies: [
-                .product(name: "Queue Primitives Core", package: "swift-queue-primitives"),
+                .product(name: "Queue Primitives", package: "swift-queue-primitives"),
                 .product(name: "Buffer Ring Primitive", package: "swift-buffer-ring-primitives"),
                 .product(name: "Buffer Ring Primitives", package: "swift-buffer-ring-primitives"),
                 .product(name: "Buffer Ring Bounded Primitive", package: "swift-buffer-ring-primitives"),
+                .product(name: "Buffer Ring Bounded Primitives", package: "swift-buffer-ring-primitives"),
                 .product(name: "Buffer Ring Inline Primitives", package: "swift-buffer-ring-primitives"),
                 .product(name: "Buffer Ring Small Primitive", package: "swift-buffer-ring-primitives"),
+                .product(name: "Buffer Ring Small Primitives", package: "swift-buffer-ring-primitives"),
+                .product(name: "Iterator Primitive", package: "swift-iterator-primitives"),
+                .product(name: "Iterable", package: "swift-iterator-primitives"),
+                .product(name: "Iterator Chunk Primitives", package: "swift-iterator-primitives"),
             ]
         ),
 
@@ -49,14 +56,20 @@ let package = Package(
             name: "Queue DoubleEnded Primitives",
             dependencies: [
                 "Queue DoubleEnded Primitive",
-                .product(name: "Queue Primitives Core", package: "swift-queue-primitives"),
+                .product(name: "Queue Primitives", package: "swift-queue-primitives"),
                 .product(name: "Buffer Ring Primitive", package: "swift-buffer-ring-primitives"),
                 .product(name: "Buffer Ring Primitives", package: "swift-buffer-ring-primitives"),
                 .product(name: "Buffer Ring Bounded Primitive", package: "swift-buffer-ring-primitives"),
+                .product(name: "Buffer Ring Bounded Primitives", package: "swift-buffer-ring-primitives"),
                 .product(name: "Buffer Ring Inline Primitives", package: "swift-buffer-ring-primitives"),
+                .product(name: "Buffer Ring Small Primitive", package: "swift-buffer-ring-primitives"),
+                .product(name: "Buffer Ring Small Primitives", package: "swift-buffer-ring-primitives"),
                 .product(name: "Buffer Linear Primitive", package: "swift-buffer-linear-primitives"),
                 .product(name: "Buffer Linear Primitives", package: "swift-buffer-linear-primitives"),
                 .product(name: "Property Primitives", package: "swift-property-primitives"),
+                .product(name: "Iterator Primitive", package: "swift-iterator-primitives"),
+                .product(name: "Iterable", package: "swift-iterator-primitives"),
+                .product(name: "Sequence Primitives", package: "swift-sequence-primitives"),
             ]
         ),
 

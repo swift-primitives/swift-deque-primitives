@@ -14,7 +14,7 @@ public import Buffer_Ring_Bounded_Primitive
 public import Buffer_Linear_Primitive
 public import Buffer_Linear_Primitives
 public import Queue_DoubleEnded_Primitive
-public import Queue_Primitives_Core
+public import Queue_Primitives
 
 // ============================================================================
 // MARK: - Queue.DoubleEnded (Dynamic)
@@ -36,17 +36,6 @@ extension Queue.DoubleEnded where Element: Copyable {
             yield &_buffer[index]
         }
     }
-}
-
-// MARK: Sequence.Protocol
-
-extension Queue.DoubleEnded: Sequence.`Protocol` where Element: Copyable {
-    /// Returns the count as the underestimated count since we know the exact size.
-    ///
-    /// This explicit implementation resolves ambiguity between Swift.Sequence
-    /// and Sequence.Protocol+Swift.Sequence default implementation.
-    @inlinable
-    public var underestimatedCount: Int { Int(bitPattern: count) }
 }
 
 // MARK: Sequence.Clearable
@@ -138,63 +127,9 @@ extension Queue.DoubleEnded: Collection.`Protocol` where Element: Copyable {}
 
 extension Queue.DoubleEnded: Collection.Access.Random where Element: Copyable {}
 
-// MARK: Swift.Collection Bridges
-
-extension Queue.DoubleEnded: Swift.Collection where Element: Copyable {}
-extension Queue.DoubleEnded: Swift.BidirectionalCollection where Element: Copyable {}
-extension Queue.DoubleEnded: Swift.RandomAccessCollection where Element: Copyable {}
-
 // ============================================================================
 // MARK: - Queue.DoubleEnded.Fixed
 // ============================================================================
-
-// MARK: Iterator
-
-extension Queue.DoubleEnded.Fixed where Element: Copyable {
-    /// An iterator over the elements of a fixed-capacity double-ended queue.
-    public struct Iterator: Sequence.Iterator.`Protocol`, IteratorProtocol {
-        @usableFromInline
-        var _inner: Buffer<Element>.Ring.Bounded.Iterator
-
-        @usableFromInline
-        init(_inner: Buffer<Element>.Ring.Bounded.Iterator) {
-            self._inner = _inner
-        }
-
-        @_lifetime(&self)
-        @inlinable
-        public mutating func nextSpan(maximumCount: Cardinal) -> Span<Element> {
-            _inner.nextSpan(maximumCount: maximumCount)
-        }
-
-        @inlinable
-        public mutating func next() -> Element? {
-            _inner.next()
-        }
-    }
-}
-
-extension Queue.DoubleEnded.Fixed.Iterator: Sendable where Element: Sendable {}
-
-// MARK: Swift.Sequence
-
-extension Queue.DoubleEnded.Fixed: Swift.Sequence where Element: Copyable {
-    /// Returns an iterator over the elements of the deque.
-    ///
-    /// Elements are yielded from front (oldest) to back (newest).
-    @inlinable
-    public func makeIterator() -> Iterator {
-        Iterator(_inner: _buffer.makeIterator())
-    }
-}
-
-// MARK: Sequence.Protocol
-
-extension Queue.DoubleEnded.Fixed: Sequence.`Protocol` where Element: Copyable {
-    /// Returns the count as the underestimated count since we know the exact size.
-    @inlinable
-    public var underestimatedCount: Int { Int(bitPattern: count) }
-}
 
 // MARK: Sequence.Clearable
 
@@ -304,75 +239,14 @@ extension Queue.DoubleEnded.Fixed: Collection.`Protocol` where Element: Copyable
 
 extension Queue.DoubleEnded.Fixed: Collection.Access.Random where Element: Copyable {}
 
-// MARK: Swift.Collection Bridges
-
-extension Queue.DoubleEnded.Fixed: Swift.Collection where Element: Copyable {}
-extension Queue.DoubleEnded.Fixed: Swift.BidirectionalCollection where Element: Copyable {}
-extension Queue.DoubleEnded.Fixed: Swift.RandomAccessCollection where Element: Copyable {}
-
 // ============================================================================
 // MARK: - Queue.DoubleEnded.Static
 // ============================================================================
 
 // Note: Queue.DoubleEnded.Static is unconditionally ~Copyable (inline storage requires deinit),
-// so it cannot conform to Swift.Sequence which requires Copyable.
-// It conforms to Sequence.Protocol which supports ~Copyable containers.
-
-// MARK: Iterator
-
-extension Queue.DoubleEnded.Static where Element: Copyable {
-    /// Iterator for Queue.DoubleEnded.Static elements.
-    ///
-    /// Delegates to `Buffer.Linear.Iterator` over a snapshot for safe iteration,
-    /// avoiding pointer escape issues with inline storage.
-    public struct Iterator: Sequence.Iterator.`Protocol`, IteratorProtocol {
-        @usableFromInline
-        var _inner: Buffer<Element>.Linear.Iterator
-
-        @usableFromInline
-        init(_inner: Buffer<Element>.Linear.Iterator) {
-            self._inner = _inner
-        }
-
-        @_lifetime(&self)
-        @inlinable
-        public mutating func nextSpan(maximumCount: Cardinal) -> Span<Element> {
-            _inner.nextSpan(maximumCount: maximumCount)
-        }
-
-        @inlinable
-        public mutating func next() -> Element? {
-            _inner.next()
-        }
-    }
-}
-
-extension Queue.DoubleEnded.Static.Iterator: Sendable where Element: Sendable {}
-
-// MARK: Sequence.Protocol
-
-extension Queue.DoubleEnded.Static: Sequence.`Protocol` where Element: Copyable {
-    /// Returns an iterator over the deque elements.
-    ///
-    /// Copies elements to a `Buffer.Linear` snapshot for safe iteration,
-    /// avoiding pointer escape issues with inline storage.
-    /// Elements are yielded from front (oldest) to back (newest).
-    ///
-    /// - Note: Incurs O(n) copy cost. For performance-critical code, use
-    ///   the mutating `forEach` method instead.
-    @inlinable
-    public borrowing func makeIterator() -> Iterator {
-        var snapshot = Buffer<Element>.Linear(minimumCapacity: count)
-        _buffer.forEach { element in
-            snapshot.append(element)
-        }
-        return Iterator(_inner: snapshot.makeIterator())
-    }
-
-    /// Returns the count as the underestimated count since we know the exact size.
-    @inlinable
-    public var underestimatedCount: Int { Int(bitPattern: count) }
-}
+// so it never conformed to Swift.Sequence (which requires Copyable). Element iteration is via the
+// institute `Iterable` + `Sequenceable` attachables in the type module
+// (Queue.DoubleEnded.Static+Iterable.swift / Queue.DoubleEnded.Static+Sequenceable.swift).
 
 // MARK: Sequence.Clearable
 
@@ -438,64 +312,9 @@ extension Queue.DoubleEnded.Static where Element: Copyable {
 // ============================================================================
 
 // Note: Queue.DoubleEnded.Small is unconditionally ~Copyable (inline storage requires deinit),
-// so it cannot conform to Swift.Sequence which requires Copyable.
-// It conforms to Sequence.Protocol which supports ~Copyable containers.
-
-// MARK: Iterator
-
-extension Queue.DoubleEnded.Small where Element: Copyable {
-    /// Iterator for Queue.DoubleEnded.Small elements.
-    ///
-    /// Delegates to `Buffer.Linear.Iterator` over a snapshot for safe iteration,
-    /// avoiding pointer escape issues with inline storage.
-    public struct Iterator: Sequence.Iterator.`Protocol`, IteratorProtocol {
-        @usableFromInline
-        var _inner: Buffer<Element>.Linear.Iterator
-
-        @usableFromInline
-        init(_inner: Buffer<Element>.Linear.Iterator) {
-            self._inner = _inner
-        }
-
-        @_lifetime(&self)
-        @inlinable
-        public mutating func nextSpan(maximumCount: Cardinal) -> Span<Element> {
-            _inner.nextSpan(maximumCount: maximumCount)
-        }
-
-        @inlinable
-        public mutating func next() -> Element? {
-            _inner.next()
-        }
-    }
-}
-
-extension Queue.DoubleEnded.Small.Iterator: Sendable where Element: Sendable {}
-
-// MARK: Sequence.Protocol
-
-extension Queue.DoubleEnded.Small: Sequence.`Protocol` where Element: Copyable {
-    /// Returns an iterator over the deque elements.
-    ///
-    /// Copies elements to a `Buffer.Linear` snapshot for safe iteration,
-    /// avoiding pointer escape issues with inline storage.
-    /// Elements are yielded from front (oldest) to back (newest).
-    ///
-    /// - Note: Incurs O(n) copy cost. For performance-critical code, use
-    ///   the mutating `forEach` method instead.
-    @inlinable
-    public borrowing func makeIterator() -> Iterator {
-        var snapshot = Buffer<Element>.Linear(minimumCapacity: count)
-        _buffer.forEach { element in
-            snapshot.append(element)
-        }
-        return Iterator(_inner: snapshot.makeIterator())
-    }
-
-    /// Returns the count as the underestimated count since we know the exact size.
-    @inlinable
-    public var underestimatedCount: Int { Int(bitPattern: count) }
-}
+// so it never conformed to Swift.Sequence (which requires Copyable). Element iteration is via the
+// institute `Iterable` + `Sequenceable` attachables in the type module
+// (Queue.DoubleEnded.Small+Iterable.swift / Queue.DoubleEnded.Small+Sequenceable.swift).
 
 // MARK: Sequence.Clearable
 

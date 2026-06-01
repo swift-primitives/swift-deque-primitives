@@ -13,7 +13,7 @@ public import Buffer_Ring_Primitive
 public import Buffer_Ring_Primitives
 public import Property_Primitives
 public import Queue_DoubleEnded_Primitive
-public import Queue_Primitives_Core
+public import Queue_Primitives
 
 // MARK: - Position Namespaces
 
