@@ -99,9 +99,9 @@ extension Queue.DoubleEnded where Element: Copyable {
     }
 }
 
-// MARK: Collection.Indexed
+// MARK: Index navigation
 
-extension Queue.DoubleEnded: Collection.Indexed where Element: Copyable {
+extension Queue.DoubleEnded where Element: Copyable {
     @inlinable
     public var startIndex: Queue.Index { .zero }
 
@@ -211,9 +211,9 @@ extension Queue.DoubleEnded.Fixed where Element: Copyable {
     }
 }
 
-// MARK: Collection.Indexed
+// MARK: Index navigation
 
-extension Queue.DoubleEnded.Fixed: Collection.Indexed where Element: Copyable {
+extension Queue.DoubleEnded.Fixed where Element: Copyable {
     @inlinable
     public var startIndex: Queue.Index { .zero }
 
