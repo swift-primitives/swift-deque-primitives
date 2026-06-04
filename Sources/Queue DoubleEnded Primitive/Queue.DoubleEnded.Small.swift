@@ -30,12 +30,12 @@ extension Queue.DoubleEnded where Element: ~Copyable {
     @safe
     public struct Small<let inlineCapacity: Int>: ~Copyable {
         @usableFromInline
-        package var _buffer: Buffer<Element>.Ring.Small<inlineCapacity>
+        package var _buffer: Buffer<Storage<Element>.Heap>.Ring.Small<inlineCapacity>
 
         /// Creates an empty small double-ended queue.
         @inlinable
         public init() {
-            self._buffer = Buffer<Element>.Ring.Small<inlineCapacity>()
+            self._buffer = Buffer<Storage<Element>.Heap>.Ring.Small<inlineCapacity>()
         }
 
         /// Whether the deque is currently using heap storage.

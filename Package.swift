@@ -33,7 +33,7 @@ let package = Package(
     targets: [
 
         // MARK: - Type module — lean ~Copyable Queue.DoubleEnded + nested variants/errors + `Deque` typealias ([MOD-036])
-        //         Ring-backed (shares Buffer<Element>.Ring with the base Queue).
+        //         Ring-backed (shares Buffer<Storage<Element>.Heap>.Ring with the base Queue).
         .target(
             name: "Queue DoubleEnded Primitive",
             dependencies: [

@@ -14,7 +14,7 @@ public import Queue_DoubleEnded_Primitives
 /// A double-ended queue: a first-class alias for ``Queue/DoubleEnded``.
 ///
 /// `Deque` is the top-level spelling of the nested `Queue<Element>.DoubleEnded`
-/// type. The deque is ring-backed (it shares `Buffer<Element>.Ring` with the base
+/// type. The deque is ring-backed (it shares `Buffer<Storage<Element>.Heap>.Ring` with the base
 /// `Queue`) yet is exposed as a first-class abstract data type.
 ///
 /// ```swift

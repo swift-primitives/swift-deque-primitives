@@ -94,7 +94,7 @@ extension Queue.DoubleEnded where Element: ~Copyable {
     public mutating func clear(keepingCapacity: Bool = true) {
         _buffer.remove.all()
         if !keepingCapacity {
-            _buffer = Buffer<Element>.Ring(minimumCapacity: .zero)
+            _buffer = Buffer<Storage<Element>.Heap>.Ring(minimumCapacity: .zero)
         }
     }
 }
@@ -173,7 +173,7 @@ extension Queue.DoubleEnded where Element: Copyable {
     public mutating func clear(keepingCapacity: Bool = true) {
         _buffer.remove.all()
         if !keepingCapacity {
-            _buffer = Buffer<Element>.Ring(minimumCapacity: .zero)
+            _buffer = Buffer<Storage<Element>.Heap>.Ring(minimumCapacity: .zero)
         }
     }
 

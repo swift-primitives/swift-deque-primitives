@@ -28,7 +28,7 @@ extension Queue.DoubleEnded.Static where Element: Copyable {
     /// Returns a single-pass consuming iterator over the deque's elements, front to back.
     /// Witness for `Sequenceable`.
     @inlinable
-    public consuming func makeIterator() -> Buffer<Element>.Ring.Inline<capacity>.Scalar {
+    public consuming func makeIterator() -> Buffer<Storage<Element>.Heap>.Ring.Inline<capacity>.Scalar {
         _buffer.makeIterator()
     }
 }

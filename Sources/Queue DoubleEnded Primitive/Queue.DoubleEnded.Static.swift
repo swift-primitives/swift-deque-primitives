@@ -28,12 +28,12 @@ extension Queue.DoubleEnded where Element: ~Copyable {
     /// No workarounds needed at this layer.
     public struct Static<let capacity: Int>: ~Copyable {
         @usableFromInline
-        package var _buffer: Buffer<Element>.Ring.Inline<capacity>
+        package var _buffer: Buffer<Storage<Element>.Heap>.Ring.Inline<capacity>
 
         /// Creates an empty inline double-ended queue.
         @inlinable
         public init() {
-            self._buffer = Buffer<Element>.Ring.Inline<capacity>()
+            self._buffer = Buffer<Storage<Element>.Heap>.Ring.Inline<capacity>()
         }
     }
 }

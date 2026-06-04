@@ -26,7 +26,7 @@ extension Queue where Element: ~Copyable {
     public struct DoubleEnded {
 
         @usableFromInline
-        package var _buffer: Buffer<Element>.Ring
+        package var _buffer: Buffer<Storage<Element>.Heap>.Ring
 
         /// Which end of the deque to operate on.
         public enum Position: Sendable, Equatable {
@@ -36,12 +36,12 @@ extension Queue where Element: ~Copyable {
 
         @inlinable
         public init() {
-            self._buffer = Buffer<Element>.Ring(minimumCapacity: .zero)
+            self._buffer = Buffer<Storage<Element>.Heap>.Ring(minimumCapacity: .zero)
         }
 
         @inlinable
         public init(reservingCapacity capacity: Index.Count) {
-            self._buffer = Buffer<Element>.Ring(minimumCapacity: capacity)
+            self._buffer = Buffer<Storage<Element>.Heap>.Ring(minimumCapacity: capacity)
         }
 
         // MARK: - Fixed (nested inside DoubleEnded)
@@ -55,13 +55,13 @@ extension Queue where Element: ~Copyable {
         @safe
         public struct Fixed {
             @usableFromInline
-            package var _buffer: Buffer<Element>.Ring.Bounded
+            package var _buffer: Buffer<Storage<Element>.Heap>.Ring.Bounded
 
             public let capacity: Index.Count
 
             @inlinable
             public init(capacity: Index.Count) {
-                self._buffer = Buffer<Element>.Ring.Bounded(minimumCapacity: capacity)
+                self._buffer = Buffer<Storage<Element>.Heap>.Ring.Bounded(minimumCapacity: capacity)
                 self.capacity = capacity
             }
         }

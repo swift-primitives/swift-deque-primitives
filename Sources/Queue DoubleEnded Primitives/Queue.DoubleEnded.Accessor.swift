@@ -38,10 +38,10 @@ extension Queue.DoubleEnded where Element: Copyable {
     /// a mutating context.
     public struct PeekAccessor {
         @usableFromInline
-        internal let _buffer: Buffer<Element>.Ring
+        internal let _buffer: Buffer<Storage<Element>.Heap>.Ring
 
         @inlinable
-        internal init(buffer: Buffer<Element>.Ring) {
+        internal init(buffer: Buffer<Storage<Element>.Heap>.Ring) {
             self._buffer = buffer
         }
 
