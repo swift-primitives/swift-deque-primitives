@@ -38,12 +38,10 @@ extension Queue.DoubleEnded where Element: Copyable {
     }
 }
 
-// MARK: Sequence.Clearable
+// MARK: removeAll()
 
-extension Queue.DoubleEnded: Sequence.Clearable where Element: Copyable {
+extension Queue.DoubleEnded where Element: Copyable {
     /// Removes all elements from the deque.
-    ///
-    /// This enables `.forEach.consuming { }` pattern via `Property.Inout` extension.
     @inlinable
     public mutating func removeAll() {
         clear(keepingCapacity: false)
@@ -131,9 +129,9 @@ extension Queue.DoubleEnded: Collection.Access.Random where Element: Copyable {}
 // MARK: - Queue.DoubleEnded.Fixed
 // ============================================================================
 
-// MARK: Sequence.Clearable
+// MARK: removeAll()
 
-extension Queue.DoubleEnded.Fixed: Sequence.Clearable where Element: Copyable {
+extension Queue.DoubleEnded.Fixed where Element: Copyable {
     /// Removes all elements from the deque.
     ///
     /// The capacity remains unchanged.
