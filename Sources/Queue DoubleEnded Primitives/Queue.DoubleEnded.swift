@@ -94,7 +94,7 @@ extension Queue.DoubleEnded where Element: ~Copyable {
     public mutating func clear(keepingCapacity: Bool = true) {
         _buffer.remove.all()
         if !keepingCapacity {
-            _buffer = Buffer<Storage<Element>.Heap>.Ring(minimumCapacity: .zero)
+            _buffer = Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring(minimumCapacity: .zero)
         }
     }
 }
@@ -173,7 +173,7 @@ extension Queue.DoubleEnded where Element: Copyable {
     public mutating func clear(keepingCapacity: Bool = true) {
         _buffer.remove.all()
         if !keepingCapacity {
-            _buffer = Buffer<Storage<Element>.Heap>.Ring(minimumCapacity: .zero)
+            _buffer = Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring(minimumCapacity: .zero)
         }
     }
 
@@ -600,5 +600,5 @@ extension Queue.DoubleEnded where Element: Copyable {
 
 // (Removed: the obsolete `_identity` CoW-test probe forwarded to
 // `Buffer.Ring.bufferIdentity` (ObjectIdentifier), which was deleted in the
-// value-type Storage.Heap migration — it was dead (zero call sites) and
+// value-type Storage.Contiguous<Memory.Heap> migration — it was dead (zero call sites) and
 // meaningless on value-type storage; CoW is now a storage-layer guarantee.)

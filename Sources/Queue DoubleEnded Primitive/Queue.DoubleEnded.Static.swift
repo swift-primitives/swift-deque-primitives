@@ -10,6 +10,8 @@
 // ===----------------------------------------------------------------------===//
 
 public import Buffer_Ring_Primitive
+public import Memory_Heap_Primitives
+public import Storage_Contiguous_Primitives
 public import Buffer_Ring_Primitives
 public import Buffer_Ring_Inline_Primitives
 public import Queue_Primitives
@@ -28,12 +30,12 @@ extension Queue.DoubleEnded where Element: ~Copyable {
     /// No workarounds needed at this layer.
     public struct Static<let capacity: Int>: ~Copyable {
         @usableFromInline
-        package var _buffer: Buffer<Storage<Element>.Heap>.Ring.Inline<capacity>
+        package var _buffer: Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring.Inline<capacity>
 
         /// Creates an empty inline double-ended queue.
         @inlinable
         public init() {
-            self._buffer = Buffer<Storage<Element>.Heap>.Ring.Inline<capacity>()
+            self._buffer = Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring.Inline<capacity>()
         }
     }
 }

@@ -10,6 +10,8 @@
 // ===----------------------------------------------------------------------===//
 
 public import Buffer_Ring_Primitive
+public import Memory_Heap_Primitives
+public import Storage_Contiguous_Primitives
 public import Buffer_Ring_Primitives
 public import Buffer_Ring_Bounded_Primitive
 public import Queue_Primitives
@@ -26,7 +28,7 @@ extension Queue where Element: ~Copyable {
     public struct DoubleEnded {
 
         @usableFromInline
-        package var _buffer: Buffer<Storage<Element>.Heap>.Ring
+        package var _buffer: Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring
 
         /// Which end of the deque to operate on.
         public enum Position: Sendable, Equatable {
@@ -36,12 +38,12 @@ extension Queue where Element: ~Copyable {
 
         @inlinable
         public init() {
-            self._buffer = Buffer<Storage<Element>.Heap>.Ring(minimumCapacity: .zero)
+            self._buffer = Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring(minimumCapacity: .zero)
         }
 
         @inlinable
         public init(reservingCapacity capacity: Index.Count) {
-            self._buffer = Buffer<Storage<Element>.Heap>.Ring(minimumCapacity: capacity)
+            self._buffer = Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring(minimumCapacity: capacity)
         }
 
         // MARK: - Fixed (nested inside DoubleEnded)
@@ -55,13 +57,13 @@ extension Queue where Element: ~Copyable {
         @safe
         public struct Fixed {
             @usableFromInline
-            package var _buffer: Buffer<Storage<Element>.Heap>.Ring.Bounded
+            package var _buffer: Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring.Bounded
 
             public let capacity: Index.Count
 
             @inlinable
             public init(capacity: Index.Count) {
-                self._buffer = Buffer<Storage<Element>.Heap>.Ring.Bounded(minimumCapacity: capacity)
+                self._buffer = Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring.Bounded(minimumCapacity: capacity)
                 self.capacity = capacity
             }
         }

@@ -10,6 +10,8 @@
 // ===----------------------------------------------------------------------===//
 
 public import Queue_Primitives
+public import Memory_Heap_Primitives
+public import Storage_Contiguous_Primitives
 public import Buffer_Ring_Primitives
 public import Buffer_Ring_Inline_Primitives
 public import Iterable
@@ -32,13 +34,13 @@ public import Iterator_Chunk_Primitives
 
 extension Queue.DoubleEnded.Static: Iterable where Element: Copyable {
     @_implements(Iterable, Iterator)
-    public typealias IterableIterator = Iterator_Primitive.Iterator.Materializing<Buffer<Storage<Element>.Heap>.Ring.Inline<capacity>.Walk>
+    public typealias IterableIterator = Iterator_Primitive.Iterator.Materializing<Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring.Inline<capacity>.Walk>
 
     /// Iterable's bulk span witness: delegates to the inline ring's borrow-backed `Iterable`
     /// witness (multipass-safe over the borrowed inline storage).
     @inlinable
     @_implements(Iterable, makeIterator())
-    public borrowing func iterableMakeIterator() -> Iterator_Primitive.Iterator.Materializing<Buffer<Storage<Element>.Heap>.Ring.Inline<capacity>.Walk> {
+    public borrowing func iterableMakeIterator() -> Iterator_Primitive.Iterator.Materializing<Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring.Inline<capacity>.Walk> {
         _buffer.makeIterator()
     }
 }

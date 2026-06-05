@@ -10,6 +10,8 @@
 // ===----------------------------------------------------------------------===//
 
 public import Buffer_Ring_Primitive
+public import Memory_Heap_Primitives
+public import Storage_Contiguous_Primitives
 public import Buffer_Ring_Primitives
 public import Property_Primitives
 public import Queue_DoubleEnded_Primitive
@@ -38,10 +40,10 @@ extension Queue.DoubleEnded where Element: Copyable {
     /// a mutating context.
     public struct PeekAccessor {
         @usableFromInline
-        internal let _buffer: Buffer<Storage<Element>.Heap>.Ring
+        internal let _buffer: Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring
 
         @inlinable
-        internal init(buffer: Buffer<Storage<Element>.Heap>.Ring) {
+        internal init(buffer: Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring) {
             self._buffer = buffer
         }
 

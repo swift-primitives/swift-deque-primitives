@@ -10,6 +10,8 @@
 // ===----------------------------------------------------------------------===//
 
 public import Queue_Primitives
+public import Memory_Heap_Primitives
+public import Storage_Contiguous_Primitives
 public import Buffer_Ring_Primitive
 public import Buffer_Ring_Primitives
 
@@ -26,7 +28,7 @@ extension Queue.DoubleEnded where Element: Copyable {
     /// Returns a single-pass consuming iterator over the deque's elements, front to back.
     /// Witness for `Sequenceable`.
     @inlinable
-    public consuming func makeIterator() -> Buffer<Storage<Element>.Heap>.Ring.Scalar {
+    public consuming func makeIterator() -> Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring.Scalar {
         _buffer.makeIterator()
     }
 }
