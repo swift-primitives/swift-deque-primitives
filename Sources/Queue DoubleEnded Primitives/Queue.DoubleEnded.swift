@@ -11,7 +11,6 @@
 
 public import Buffer_Ring_Primitive
 public import Buffer_Ring_Primitives
-public import Buffer_Ring_Inline_Primitives
 public import Memory_Small_Primitives
 public import Storage_Primitive
 public import Queue_DoubleEnded_Primitive
