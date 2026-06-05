@@ -246,9 +246,6 @@ extension Queue.DoubleEnded.Fixed: Collection.Access.Random where Element: Copya
 // institute `Iterable` + `Sequenceable` attachables in the type module
 // (Queue.DoubleEnded.Static+Iterable.swift / Queue.DoubleEnded.Static+Sequenceable.swift).
 
-// MARK: Sequence.Clearable
-
-
 // MARK: Sequence.Drain.Protocol
 
 
@@ -266,9 +263,6 @@ extension Queue.DoubleEnded.Fixed: Collection.Access.Random where Element: Copya
 // so it never conformed to Swift.Sequence (which requires Copyable). Element iteration is via the
 // institute `Iterable` + `Sequenceable` attachables in the type module
 // (Queue.DoubleEnded.Small+Iterable.swift / Queue.DoubleEnded.Small+Sequenceable.swift).
-
-// MARK: Sequence.Clearable
-
 
 // MARK: Sequence.Drain.Protocol
 
