@@ -12,6 +12,8 @@
 public import Buffer_Ring_Primitive
 public import Buffer_Ring_Primitives
 public import Buffer_Ring_Inline_Primitives
+public import Memory_Small_Primitives
+public import Storage_Primitive
 public import Queue_DoubleEnded_Primitive
 public import Queue_Primitives
 
@@ -374,150 +376,9 @@ extension Queue.DoubleEnded.Fixed where Element: Copyable {
 
 // MARK: - Static Properties and Operations
 
-extension Queue.DoubleEnded.Static {
-    /// The current number of elements.
-    @inlinable
-    public var count: Index_Primitives.Index<Element>.Count { _buffer.count }
-
-    /// Whether the deque is empty.
-    @inlinable
-    public var isEmpty: Bool { _buffer.isEmpty }
-
-    /// Whether the deque is full.
-    @inlinable
-    public var isFull: Bool { _buffer.isFull }
-
-    /// Pushes an element to the specified end.
-    @inlinable
-    public mutating func push(
-        _ element: consuming Element,
-        to position: Queue<Element>.DoubleEnded.Position
-    ) throws(Queue<Element>.DoubleEnded.Static<capacity>.Error) {
-        guard !isFull else { throw .overflow }
-        switch position {
-        case .front:
-            _buffer.push.front(consume element)
-        case .back:
-            _buffer.push.back(consume element)
-        }
-    }
-
-    /// Pops an element from the specified end, or nil if empty.
-    @inlinable
-    public mutating func pop(from position: Queue<Element>.DoubleEnded.Position) -> Element? {
-        guard !isEmpty else { return nil }
-        switch position {
-        case .front:
-            return _buffer.pop.front()
-        case .back:
-            return _buffer.pop.back()
-        }
-    }
-
-    /// Takes an element from the specified end, or nil if empty.
-    @inlinable
-    public mutating func take(from position: Queue<Element>.DoubleEnded.Position) -> Element? {
-        pop(from: position)
-    }
-
-    /// Peeks at the element at the specified end.
-    @inlinable
-    public func peek<R>(
-        at position: Queue<Element>.DoubleEnded.Position,
-        _ body: (borrowing Element) -> R
-    ) -> R? {
-        guard !isEmpty else { return nil }
-        switch position {
-        case .front:
-            return _buffer.withFront(body)
-        case .back:
-            return _buffer.withBack(body)
-        }
-    }
-
-    /// Removes all elements.
-    @inlinable
-    public mutating func clear() {
-        _buffer.remove.all()
-    }
-
-    /// Calls the given closure for each element.
-    @inlinable
-    public func forEach(_ body: (borrowing Element) -> Void) {
-        _buffer.forEach(body)
-    }
-}
 
 // MARK: - Small Properties and Operations
 
-extension Queue.DoubleEnded.Small {
-    /// The current number of elements.
-    @inlinable
-    public var count: Index_Primitives.Index<Element>.Count { _buffer.count }
-
-    /// Whether the deque is empty.
-    @inlinable
-    public var isEmpty: Bool { _buffer.isEmpty }
-
-    /// Pushes an element to the specified end.
-    @inlinable
-    public mutating func push(
-        _ element: consuming Element,
-        to position: Queue<Element>.DoubleEnded.Position
-    ) {
-        switch position {
-        case .front:
-            _buffer.push.front(consume element)
-        case .back:
-            _buffer.push.back(consume element)
-        }
-    }
-
-    /// Pops an element from the specified end, or nil if empty.
-    @inlinable
-    public mutating func pop(from position: Queue<Element>.DoubleEnded.Position) -> Element? {
-        guard !isEmpty else { return nil }
-        switch position {
-        case .front:
-            return _buffer.pop.front()
-        case .back:
-            return _buffer.pop.back()
-        }
-    }
-
-    /// Takes an element from the specified end, or nil if empty.
-    @inlinable
-    public mutating func take(from position: Queue<Element>.DoubleEnded.Position) -> Element? {
-        pop(from: position)
-    }
-
-    /// Peeks at the element at the specified end.
-    @inlinable
-    public func peek<R>(
-        at position: Queue<Element>.DoubleEnded.Position,
-        _ body: (borrowing Element) -> R
-    ) -> R? {
-        guard !isEmpty else { return nil }
-        switch position {
-        case .front:
-            return _buffer.withFront(body)
-        case .back:
-            return _buffer.withBack(body)
-        }
-    }
-
-    /// Removes all elements.
-    @inlinable
-    public mutating func clear() {
-        _buffer.remove.all()
-    }
-
-    /// Calls the given closure for each element.
-    @inlinable
-    public func forEach(_ body: (borrowing Element) -> Void) {
-        _buffer.forEach(body)
-    }
-}
 
 // Note: the base `Swift.Sequence` conformance + nested `struct Iterator` are dropped per the
 // recipe-2 migration (the deferred stdlib-interop axis). Element iteration is via the institute

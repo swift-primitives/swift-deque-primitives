@@ -250,62 +250,15 @@ extension Queue.DoubleEnded.Fixed: Collection.Access.Random where Element: Copya
 
 // MARK: Sequence.Clearable
 
-extension Queue.DoubleEnded.Static: Sequence.Clearable where Element: Copyable {
-    /// Removes all elements from the deque.
-    ///
-    /// This enables `.forEach.consuming { }` pattern via `Property.Inout` extension.
-    @inlinable
-    public mutating func removeAll() {
-        clear()
-    }
-}
 
 // MARK: Sequence.Drain.Protocol
 
-extension Queue.DoubleEnded.Static: Sequence.Drain.`Protocol` where Element: Copyable {
-    /// Drains all elements in front-to-back order, passing each to the closure with ownership.
-    ///
-    /// After this method returns, the deque is empty but still usable.
-    ///
-    /// - Parameter body: A closure that receives each drained element with ownership.
-    /// - Complexity: O(n) where n is the number of elements.
-    @inlinable
-    public mutating func drain(_ body: (consuming Element) -> Void) {
-        while let element = pop(from: .front) {
-            body(element)
-        }
-    }
-}
 
 // MARK: Static Conditional Drain
 
-extension Queue.DoubleEnded.Static where Element: Copyable {
-    /// Drains elements front-to-back while the predicate returns true.
-    @inlinable
-    public mutating func drain(
-        while predicate: (borrowing Element) -> Bool,
-        _ body: (consuming Element) -> Void
-    ) {
-        while peek(at: .front, predicate) ?? false {
-            body(pop(from: .front)!)
-        }
-    }
-}
 
 // MARK: Drain Property Accessor
 
-extension Queue.DoubleEnded.Static where Element: Copyable {
-    /// Accessor for drain operations.
-    public var drain: Property<Sequence.Drain, Self>.Inout {
-        mutating _read {
-            yield Property<Sequence.Drain, Self>.Inout(&self)
-        }
-        mutating _modify {
-            var accessor = Property<Sequence.Drain, Self>.Inout(&self)
-            yield &accessor
-        }
-    }
-}
 
 // ============================================================================
 // MARK: - Queue.DoubleEnded.Small
@@ -318,61 +271,12 @@ extension Queue.DoubleEnded.Static where Element: Copyable {
 
 // MARK: Sequence.Clearable
 
-extension Queue.DoubleEnded.Small: Sequence.Clearable where Element: Copyable {
-    /// Removes all elements from the deque.
-    ///
-    /// Resets to inline mode if spilled.
-    /// This enables `.forEach.consuming { }` pattern via `Property.Inout` extension.
-    @inlinable
-    public mutating func removeAll() {
-        clear()
-    }
-}
 
 // MARK: Sequence.Drain.Protocol
 
-extension Queue.DoubleEnded.Small: Sequence.Drain.`Protocol` where Element: Copyable {
-    /// Drains all elements in front-to-back order, passing each to the closure with ownership.
-    ///
-    /// After this method returns, the deque is empty but still usable.
-    /// Resets to inline mode if spilled.
-    ///
-    /// - Parameter body: A closure that receives each drained element with ownership.
-    /// - Complexity: O(n) where n is the number of elements.
-    @inlinable
-    public mutating func drain(_ body: (consuming Element) -> Void) {
-        while let element = pop(from: .front) {
-            body(element)
-        }
-    }
-}
 
 // MARK: Small Conditional Drain
 
-extension Queue.DoubleEnded.Small where Element: Copyable {
-    /// Drains elements front-to-back while the predicate returns true.
-    @inlinable
-    public mutating func drain(
-        while predicate: (borrowing Element) -> Bool,
-        _ body: (consuming Element) -> Void
-    ) {
-        while peek(at: .front, predicate) ?? false {
-            body(pop(from: .front)!)
-        }
-    }
-}
 
 // MARK: Drain Property Accessor
 
-extension Queue.DoubleEnded.Small where Element: Copyable {
-    /// Accessor for drain operations.
-    public var drain: Property<Sequence.Drain, Self>.Inout {
-        mutating _read {
-            yield Property<Sequence.Drain, Self>.Inout(&self)
-        }
-        mutating _modify {
-            var accessor = Property<Sequence.Drain, Self>.Inout(&self)
-            yield &accessor
-        }
-    }
-}
