@@ -82,8 +82,6 @@ extension Queue.DoubleEnded: Copyable where Element: Copyable {}
 /// `Queue.DoubleEnded.Fixed` is `Copyable` when its elements are `Copyable`.
 extension Queue.DoubleEnded.Fixed: Copyable where Element: Copyable {}
 
-// Note: Queue.DoubleEnded.Static and Queue.DoubleEnded.Small are UNCONDITIONALLY ~Copyable due to deinit
-
 // MARK: - Sendable
 
 /// `Queue.DoubleEnded` is `Sendable` when its elements are `Sendable`.

@@ -373,12 +373,6 @@ extension Queue.DoubleEnded.Fixed where Element: Copyable {
     }
 }
 
-// MARK: - Static Properties and Operations
-
-
-// MARK: - Small Properties and Operations
-
-
 // Note: the base `Swift.Sequence` conformance + nested `struct Iterator` are dropped per the
 // recipe-2 migration (the deferred stdlib-interop axis). Element iteration is via the institute
 // `Iterable` + `Sequenceable` attachables in the type module
