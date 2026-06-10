@@ -9,26 +9,40 @@
 //
 // ===----------------------------------------------------------------------===//
 
+public import Queue_Primitive
+public import Buffer_Primitive
 public import Buffer_Ring_Primitive
-public import Memory_Heap_Primitives
-public import Storage_Contiguous_Primitives
-public import Buffer_Ring_Primitives
 public import Buffer_Ring_Bounded_Primitive
-public import Queue_Primitives
+public import Storage_Contiguous_Primitives
+public import Memory_Heap_Primitives
+public import Memory_Allocator_Primitive
+public import Shared_Primitive
+public import Index_Primitives
 
-extension Queue where Element: ~Copyable {
+// MARK: - Queue.DoubleEnded (the deque — the same ring COLUMN, both ends)
 
-    /// Double-ended queue with O(1) amortized operations at both ends.
+extension Queue where S: ~Copyable {
+
+    /// A double-ended queue over the SAME ring column vocabulary as `Queue<S>` —
+    /// the nesting carries the column (ADT-families tranche, 2026-06-10):
     ///
-    /// Operations and implementation details are in `Queue.DoubleEnded.swift`.
-    // WHY: Category D — structural Sendable workaround; the type is
-    // WHY: structurally value-safe but the compiler cannot synthesize
-    // WHY: Sendable due to a stored pointer / generic parameter shape.
-    @safe
-    public struct DoubleEnded {
+    /// ```swift
+    /// Queue<            Buffer<…>.Ring        >.DoubleEnded   // zero-cost MOVE-ONLY (default)
+    /// Queue<Shared<Int, Buffer<…>.Ring>       >.DoubleEnded   // explicit CoW value semantics
+    /// Queue<            Buffer<…>.Ring.Bounded>.DoubleEnded   // fixed-capacity (the former .Fixed)
+    /// ```
+    ///
+    /// Pops and peeks at BOTH ends ride the front-anchored seam generically
+    /// (`move(at: .zero)` / `move(at: count − 1)`); pushes pin per column (back-push
+    /// grows or rejects; front-push is a column op crossing the `Shared` box via
+    /// `withUnique`). The former nested `.Fixed` is dissolved into the bounded column
+    /// (ASK-E).
+    @frozen
+    public struct DoubleEnded: ~Copyable {
 
+        /// The ring storage column.
         @usableFromInline
-        package var _buffer: Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring
+        package var store: S
 
         /// Which end of the deque to operate on.
         public enum Position: Sendable, Equatable {
@@ -36,56 +50,84 @@ extension Queue where Element: ~Copyable {
             case back
         }
 
+        /// Wraps an existing column.
         @inlinable
-        public init() {
-            self._buffer = Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring(minimumCapacity: .zero)
+        public init(store: consuming S) {
+            self.store = store
         }
 
+        /// Consumes the deque, yielding its storage column.
         @inlinable
-        public init(reservingCapacity capacity: Index.Count) {
-            self._buffer = Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring(minimumCapacity: capacity)
+        public consuming func take() -> S {
+            store
         }
-
-        // MARK: - Fixed (nested inside DoubleEnded)
-
-        /// Fixed-capacity double-ended queue.
-        ///
-        /// Accessed as `Queue<E>.DoubleEnded.Fixed` or via the `Deque.Fixed` typealias.
-        // WHY: Category D — structural Sendable workaround; the type is
-        // WHY: structurally value-safe but the compiler cannot synthesize
-        // WHY: Sendable due to a stored pointer / generic parameter shape.
-        @safe
-        public struct Fixed {
-            @usableFromInline
-            package var _buffer: Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring.Bounded
-
-            public let capacity: Index.Count
-
-            @inlinable
-            public init(capacity: Index.Count) {
-                self._buffer = Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring.Bounded(minimumCapacity: capacity)
-                self.capacity = capacity
-            }
-        }
-
     }
 }
 
-// MARK: - Conditional Conformances
+// MARK: - Conditional Conformances (co-located per [COPY-FIX-004])
 
-/// `Queue.DoubleEnded` is `Copyable` when its elements are `Copyable`.
-///
-/// This enables value semantics with copy-on-write optimization:
-/// copies share storage until mutation.
-extension Queue.DoubleEnded: Copyable where Element: Copyable {}
+/// The S5 chain: copyability flows from the column.
+extension Queue.DoubleEnded: Copyable where S: Copyable {}
 
-/// `Queue.DoubleEnded.Fixed` is `Copyable` when its elements are `Copyable`.
-extension Queue.DoubleEnded.Fixed: Copyable where Element: Copyable {}
+extension Queue.DoubleEnded: Sendable where S: Sendable & ~Copyable {}
 
-// MARK: - Sendable
+// MARK: - Typed index (re-anchoring front-relative positions, like the queue's)
 
-/// `Queue.DoubleEnded` is `Sendable` when its elements are `Sendable`.
-extension Queue.DoubleEnded: @unchecked Sendable where Element: Sendable {}
+extension Queue.DoubleEnded where S: ~Copyable {
+    public typealias Index = Index_Primitives.Index<S.Element>
+}
 
-/// `Queue.DoubleEnded.Fixed` is `Sendable` when its elements are `Sendable`.
-extension Queue.DoubleEnded.Fixed: @unchecked Sendable where Element: Sendable {}
+// MARK: - Column-pinned construction
+
+extension Queue.DoubleEnded where S: ~Copyable {
+    /// Creates an empty MOVE-ONLY growable deque (the default ownership column).
+    @inlinable
+    public init<E: ~Copyable>(minimumCapacity: Index_Primitives.Index<E>.Count = .zero)
+    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring {
+        self.init(store: S(minimumCapacity: minimumCapacity))
+    }
+
+    /// Creates an empty MOVE-ONLY fixed-capacity deque (the former `.Fixed`).
+    @inlinable
+    public init<E: ~Copyable>(capacity: Index_Primitives.Index<E>.Count)
+    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded {
+        self.init(store: S(minimumCapacity: capacity))
+    }
+
+    /// Creates an empty CoW (value-semantic) growable deque on the `Shared` column.
+    @inlinable
+    public init<E>(minimumCapacity: Index_Primitives.Index<E>.Count = .zero)
+    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring> {
+        self.init(store: Shared(
+            Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring(minimumCapacity: minimumCapacity)
+        ))
+    }
+
+    /// Creates an empty statically-unique deque of move-only elements on the `Shared` column.
+    @inlinable
+    public init<E: ~Copyable>(minimumCapacity: Index_Primitives.Index<E>.Count = .zero)
+    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring> {
+        self.init(store: Shared(
+            Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring(minimumCapacity: minimumCapacity)
+        ))
+    }
+
+    /// Creates an empty CoW fixed-capacity deque on the `Shared` bounded column.
+    @inlinable
+    public init<E>(capacity: Index_Primitives.Index<E>.Count)
+    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded> {
+        self.init(store: Shared(
+            Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded(minimumCapacity: capacity)
+        ))
+    }
+
+    /// Creates an empty statically-unique fixed-capacity deque of move-only elements
+    /// on the `Shared` bounded column.
+    @inlinable
+    public init<E: ~Copyable>(capacity: Index_Primitives.Index<E>.Count)
+    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded> {
+        self.init(store: Shared(
+            Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded(minimumCapacity: capacity)
+        ))
+    }
+}

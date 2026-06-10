@@ -1,5 +1,6 @@
 // exports.swift
-// Package-name-facing umbrella: `import Deque_Primitives` surfaces the deque
-// (the nested `Queue.DoubleEnded` discipline) plus the top-level `Deque` typealias.
+// Deque Primitives declares the top-level `Deque<S>` typealias over
+// `Queue<S>.DoubleEnded`; re-exports the in-package deque modules only ([MOD-005]).
 
+@_exported public import Queue_DoubleEnded_Primitive
 @_exported public import Queue_DoubleEnded_Primitives

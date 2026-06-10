@@ -9,18 +9,22 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import Queue_DoubleEnded_Primitives
+public import Queue_Primitive
+public import Store_Protocol_Primitives
+public import Buffer_Protocol_Primitives
+public import Index_Primitives
 
-/// A double-ended queue: a first-class alias for ``Queue/DoubleEnded``.
+/// Standard double-ended queue (deque) vocabulary.
 ///
-/// `Deque` is the top-level spelling of the nested `Queue<Element>.DoubleEnded`
-/// type. The deque is ring-backed (it shares `Buffer<Storage<Element>.Contiguous<Memory.Heap<Element>>>.Ring` with the base
-/// `Queue`) yet is exposed as a first-class abstract data type.
+/// `Deque<S>` is the top-level spelling of the nested `Queue<S>.DoubleEnded` — the
+/// same column vocabulary as `Queue<S>` (growable/bounded ring, direct/`Shared`),
+/// exposed as a first-class abstract data type.
 ///
 /// ```swift
-/// var deque = Deque<Int>()
+/// var deque = Deque<Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<Int>>.Ring>(minimumCapacity: 4)
 /// deque.push(1, to: .back)
 /// deque.push(2, to: .front)
 /// deque.pop(from: .front)   // Optional(2)
 /// ```
-public typealias Deque<Element: ~Copyable> = Queue<Element>.DoubleEnded
+public typealias Deque<S: Store.`Protocol` & Buffer.`Protocol` & ~Copyable> = Queue<S>.DoubleEnded
+    where S.Count == Index_Primitives.Index<S.Element>.Count
