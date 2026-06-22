@@ -16,7 +16,7 @@ import Testing
 // The column-keyed deque suite over the same four ring columns as the queue.
 
 private typealias HeapStorage<E: ~Copyable> =
-    Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>
+    Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>
 
 private typealias GrowableRing<E: ~Copyable> = Buffer<HeapStorage<E>>.Ring
 private typealias BoundedRing<E: ~Copyable> = Buffer<HeapStorage<E>>.Ring.Bounded

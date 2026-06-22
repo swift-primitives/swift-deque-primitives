@@ -34,7 +34,7 @@ extension Queue.DoubleEnded where S: ~Copyable {
     /// - Complexity: O(1) amortized
     @inlinable
     public mutating func push<E: ~Copyable>(_ element: consuming E, to position: Position)
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring {
+    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring {
         switch position {
         case .front:
             store.pushFront(element)
@@ -49,7 +49,7 @@ extension Queue.DoubleEnded where S: ~Copyable {
     /// - Complexity: O(1) amortized (O(n) when a copy must be made first)
     @inlinable
     public mutating func push<E: ~Copyable>(_ element: consuming E, to position: Position)
-    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring> {
+    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring> {
         store.withUnique(consuming: element) { ring, element in
             switch position {
             case .front:
@@ -66,7 +66,7 @@ extension Queue.DoubleEnded where S: ~Copyable {
     /// - Complexity: O(1)
     @inlinable
     public mutating func push<E: ~Copyable>(_ element: consuming E, to position: Position) throws(Queue<S>.Error)
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded {
+    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded {
         let rejected: E?
         switch position {
         case .front:
@@ -86,7 +86,7 @@ extension Queue.DoubleEnded where S: ~Copyable {
     /// - Complexity: O(1)
     @inlinable
     public mutating func push<E: ~Copyable>(_ element: consuming E, to position: Position) throws(Queue<S>.Error)
-    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded> {
+    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded> {
         let rejected = store.withUnique(consuming: element) { ring, element -> E? in
             switch position {
             case .front:
@@ -109,7 +109,7 @@ extension Queue.DoubleEnded where S: ~Copyable {
     /// Removes all elements (direct growable column).
     @inlinable
     public mutating func clear<E: ~Copyable>(keepingCapacity: Bool = true)
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring {
+    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring {
         store.removeAll()
         if !keepingCapacity {
             store = S(minimumCapacity: .zero)
@@ -119,17 +119,17 @@ extension Queue.DoubleEnded where S: ~Copyable {
     /// Removes all elements (direct bounded column; the fixed capacity remains).
     @inlinable
     public mutating func clear<E: ~Copyable>()
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded {
+    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded {
         store.remove.all()
     }
 
     /// Removes all elements (`Shared` growable column; detaches to a fresh box).
     @inlinable
     public mutating func clear<E>(keepingCapacity: Bool = true)
-    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring> {
+    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring> {
         let capacity: Index_Primitives.Index<E>.Count = keepingCapacity ? store.capacity : .zero
         self.store = Shared(
-            Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring(minimumCapacity: capacity)
+            Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring(minimumCapacity: capacity)
         )
     }
 
@@ -137,9 +137,9 @@ extension Queue.DoubleEnded where S: ~Copyable {
     /// same fixed capacity).
     @inlinable
     public mutating func clear<E>()
-    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded> {
+    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded> {
         self.store = Shared(
-            Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded(minimumCapacity: store.capacity)
+            Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded(minimumCapacity: store.capacity)
         )
     }
 }
@@ -152,14 +152,14 @@ extension Queue.DoubleEnded where S: ~Copyable {
     /// Reserves capacity for at least the given number of elements (direct column).
     @inlinable
     public mutating func reserve<E: ~Copyable>(_ minimumCapacity: Index_Primitives.Index<E>.Count)
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring {
+    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring {
         store.reserveCapacity(minimumCapacity)
     }
 
     /// Reserves capacity (`Shared` column; uniquely, behind the gate).
     @inlinable
     public mutating func reserve<E: ~Copyable>(_ minimumCapacity: Index_Primitives.Index<E>.Count)
-    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring> {
+    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring> {
         store.withUnique { ring in
             ring.reserveCapacity(minimumCapacity)
         }
@@ -174,14 +174,14 @@ extension Queue.DoubleEnded where S: ~Copyable {
     /// Returns an independent copy of this deque (direct growable column).
     @inlinable
     public func clone<E>() -> Self
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring {
+    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring {
         Self(store: store.clone())
     }
 
     /// Returns an independent copy of this deque (direct bounded column).
     @inlinable
     public func clone<E>() -> Self
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>>.Ring.Bounded {
+    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded {
         Self(store: store.clone())
     }
 }

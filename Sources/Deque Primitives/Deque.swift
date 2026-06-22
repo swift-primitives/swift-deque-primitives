@@ -21,7 +21,7 @@ public import Index_Primitives
 /// exposed as a first-class abstract data type.
 ///
 /// ```swift
-/// var deque = Deque<Buffer<Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<Int>>.Ring>(minimumCapacity: 4)
+/// var deque = Deque<Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<Int>>.Ring>(minimumCapacity: 4)
 /// deque.push(1, to: .back)
 /// deque.push(2, to: .front)
 /// deque.pop(from: .front)   // Optional(2)
