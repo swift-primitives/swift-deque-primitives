@@ -2,6 +2,7 @@ import Deque_Primitives
 import Queue_Primitive
 import Buffer_Primitive
 import Buffer_Ring_Primitive
+import Buffer_Ring_Primitives
 import Buffer_Ring_Bounded_Primitive
 import Buffer_Primitives_Test_Support
 import Storage_Contiguous_Primitives
@@ -24,6 +25,48 @@ private typealias BoundedRing<E: ~Copyable> = Buffer<HeapStorage<E>>.Ring.Bounde
 private typealias MoveDeque<E: ~Copyable> = Deque<GrowableRing<E>>
 private typealias CoWDeque<E: ~Copyable> = Deque<Shared<E, GrowableRing<E>>>
 private typealias FixedDeque<E: ~Copyable> = Deque<BoundedRing<E>>
+
+// MARK: - [DS-024]: the columns are lawful from the deque family's own suite
+
+@Suite
+struct DequeColumnLawTests {
+
+    @Test
+    func `the direct growable-ring column obeys the seam ledger laws`() {
+        let violations = Seam.Ledger.violations(
+            makeEmpty: { GrowableRing<Int>(minimumCapacity: Index<Int>.Count(4)) },
+            element: { $0 }
+        )
+        #expect(violations.isEmpty, "\(violations)")
+    }
+
+    @Test
+    func `the direct bounded-ring column obeys the seam ledger laws`() {
+        let violations = Seam.Ledger.violations(
+            makeEmpty: { BoundedRing<Int>(minimumCapacity: Index<Int>.Count(4)) },
+            element: { $0 }
+        )
+        #expect(violations.isEmpty, "\(violations)")
+    }
+
+    @Test
+    func `the shared growable-ring column obeys the seam ledger laws`() {
+        let violations = Seam.Ledger.violations(
+            makeEmpty: { Shared(GrowableRing<Int>(minimumCapacity: Index<Int>.Count(4))) },
+            element: { $0 }
+        )
+        #expect(violations.isEmpty, "\(violations)")
+    }
+
+    @Test
+    func `the shared bounded-ring column obeys the seam ledger laws`() {
+        let violations = Seam.Ledger.violations(
+            makeEmpty: { Shared(BoundedRing<Int>(minimumCapacity: Index<Int>.Count(4))) },
+            element: { $0 }
+        )
+        #expect(violations.isEmpty, "\(violations)")
+    }
+}
 
 @Suite(.serialized)
 struct DequeCoreTests {

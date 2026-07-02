@@ -94,6 +94,7 @@ let package = Package(
             name: "Queue DoubleEnded Primitives Tests",
             dependencies: [
                 "Deque Primitives",
+                .product(name: "Buffer Ring Primitives", package: "swift-buffer-ring-primitives"),
                 .product(name: "Buffer Primitives Test Support", package: "swift-buffer-primitives"),
                 .product(name: "Tagged Primitives Standard Library Integration", package: "swift-tagged-primitives"),
                 .product(name: "Ordinal Primitives Standard Library Integration", package: "swift-ordinal-primitives"),

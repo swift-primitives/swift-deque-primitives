@@ -13,7 +13,6 @@
 // seam (`move(at: .zero)` = front; `move(at: count − 1)` = back), the gate makes them
 // CoW-correct on the `Shared` columns; pushes pin per column (`+Columns.swift`).
 public import Queue_DoubleEnded_Primitive
-public import Queue_Primitive
 public import Buffer_Protocol_Primitives
 public import Store_Protocol_Primitives
 import Index_Primitives
@@ -24,7 +23,8 @@ import Affine_Primitives_Standard_Library_Integration
 // MARK: - Properties
 // ============================================================================
 
-extension Queue.DoubleEnded where S: ~Copyable {
+extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`Protocol`,
+    S.Count == Index_Primitives.Index<S.Element>.Count {
     /// The number of elements in the deque.
     @inlinable
     public var count: Index.Count { store.count }
@@ -49,7 +49,8 @@ extension Queue.DoubleEnded where S: ~Copyable {
 // MARK: - Pops + peeks at both ends (generic: gate + the seam's boundary moves)
 // ============================================================================
 
-extension Queue.DoubleEnded where S: ~Copyable {
+extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`Protocol`,
+    S.Count == Index_Primitives.Index<S.Element>.Count {
     /// Removes and returns the element at the given end, or nil if empty.
     ///
     /// - Complexity: O(1)
@@ -112,7 +113,9 @@ extension Queue.DoubleEnded where S: ~Copyable {
     }
 }
 
-extension Queue.DoubleEnded where S: ~Copyable, S.Element: Copyable {
+extension __QueueDoubleEnded where S: ~Copyable, S.Element: Copyable,
+    S: Store.`Protocol` & Buffer.`Protocol`,
+    S.Count == Index_Primitives.Index<S.Element>.Count {
     /// Returns the element at the given end by value, or nil if empty.
     @inlinable
     public func peek(at position: Position) -> S.Element? {
@@ -124,7 +127,7 @@ extension Queue.DoubleEnded where S: ~Copyable, S.Element: Copyable {
 // MARK: - Cloning (generic on the CoW columns)
 // ============================================================================
 
-extension Queue.DoubleEnded where S: Copyable {
+extension __QueueDoubleEnded where S: Copyable, S: Store.`Protocol` {
     /// Returns an independent copy of this deque with its own storage (`Shared`
     /// columns: the mutation gate on the fresh copy ALWAYS installs a deep copy).
     ///

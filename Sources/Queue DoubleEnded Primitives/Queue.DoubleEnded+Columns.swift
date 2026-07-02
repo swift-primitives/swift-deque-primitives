@@ -28,7 +28,7 @@ public import Index_Primitives
 // MARK: - Push (growable columns: grows; bounded columns: typed-throws on full)
 // ============================================================================
 
-extension Queue.DoubleEnded where S: ~Copyable {
+extension __QueueDoubleEnded where S: ~Copyable {
     /// Pushes an element at the given end (direct growable column; grows as needed).
     ///
     /// - Complexity: O(1) amortized
@@ -62,10 +62,10 @@ extension Queue.DoubleEnded where S: ~Copyable {
 
     /// Pushes an element at the given end (direct bounded column).
     ///
-    /// - Throws: `Queue<S>.Error.full` when the fixed capacity is exhausted.
+    /// - Throws: `__Queue<S>.Error.full` when the fixed capacity is exhausted.
     /// - Complexity: O(1)
     @inlinable
-    public mutating func push<E: ~Copyable>(_ element: consuming E, to position: Position) throws(Queue<S>.Error)
+    public mutating func push<E: ~Copyable>(_ element: consuming E, to position: Position) throws(__Queue<S>.Error)
     where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded {
         let rejected: E?
         switch position {
@@ -82,10 +82,10 @@ extension Queue.DoubleEnded where S: ~Copyable {
     /// Pushes an element at the given end (`Shared` bounded column; uniqueness
     /// restored first).
     ///
-    /// - Throws: `Queue<S>.Error.full` when the fixed capacity is exhausted.
+    /// - Throws: `__Queue<S>.Error.full` when the fixed capacity is exhausted.
     /// - Complexity: O(1)
     @inlinable
-    public mutating func push<E: ~Copyable>(_ element: consuming E, to position: Position) throws(Queue<S>.Error)
+    public mutating func push<E: ~Copyable>(_ element: consuming E, to position: Position) throws(__Queue<S>.Error)
     where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded> {
         let rejected = store.withUnique(consuming: element) { ring, element -> E? in
             switch position {
@@ -105,7 +105,7 @@ extension Queue.DoubleEnded where S: ~Copyable {
 // MARK: - Clear (the Shared forms DETACH, preserving siblings)
 // ============================================================================
 
-extension Queue.DoubleEnded where S: ~Copyable {
+extension __QueueDoubleEnded where S: ~Copyable {
     /// Removes all elements (direct growable column).
     @inlinable
     public mutating func clear<E: ~Copyable>(keepingCapacity: Bool = true)
@@ -148,7 +148,7 @@ extension Queue.DoubleEnded where S: ~Copyable {
 // MARK: - Capacity (growable columns)
 // ============================================================================
 
-extension Queue.DoubleEnded where S: ~Copyable {
+extension __QueueDoubleEnded where S: ~Copyable {
     /// Reserves capacity for at least the given number of elements (direct column).
     @inlinable
     public mutating func reserve<E: ~Copyable>(_ minimumCapacity: Index_Primitives.Index<E>.Count)
@@ -170,7 +170,7 @@ extension Queue.DoubleEnded where S: ~Copyable {
 // MARK: - Cloning (direct columns; the generic `clone()` covers the CoW columns)
 // ============================================================================
 
-extension Queue.DoubleEnded where S: ~Copyable {
+extension __QueueDoubleEnded where S: ~Copyable {
     /// Returns an independent copy of this deque (direct growable column).
     @inlinable
     public func clone<E>() -> Self
