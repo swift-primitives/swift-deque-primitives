@@ -27,7 +27,7 @@ import Cardinal_Primitives
 // The ratified ring columns, spelled as the package's own test suite spells them.
 
 typealias HeapStorage<E: ~Copyable> =
-    Storage<Memory.Allocator<Memory.Heap>.System>.Contiguous<E>
+    Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>
 
 typealias GrowableRing<E: ~Copyable> = Buffer<HeapStorage<E>>.Ring
 
