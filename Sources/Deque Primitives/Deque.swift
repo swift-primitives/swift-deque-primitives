@@ -12,7 +12,6 @@
 public import Queue_DoubleEnded_Primitives
 public import Store_Protocol_Primitives
 public import Buffer_Protocol_Primitives
-public import Index_Primitives
 
 /// Standard double-ended queue (deque) vocabulary.
 ///
@@ -30,4 +29,3 @@ public import Index_Primitives
 /// deque.pop(from: .front)   // Optional(2)
 /// ```
 public typealias Deque<S: Store.`Protocol` & Buffer.`Protocol` & ~Copyable> = __QueueDoubleEnded<S>
-    where S.Count == Index_Primitives.Index<S.Element>.Count

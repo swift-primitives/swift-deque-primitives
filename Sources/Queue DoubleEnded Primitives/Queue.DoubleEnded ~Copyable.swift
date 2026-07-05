@@ -23,8 +23,7 @@ import Affine_Primitives_Standard_Library_Integration
 // MARK: - Properties
 // ============================================================================
 
-extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`Protocol`,
-    S.Count == Index_Primitives.Index<S.Element>.Count {
+extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`Protocol` {
     /// The number of elements in the deque.
     @inlinable
     public var count: Index.Count { store.count }
@@ -49,8 +48,7 @@ extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`P
 // MARK: - Pops + peeks at both ends (generic: gate + the seam's boundary moves)
 // ============================================================================
 
-extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`Protocol`,
-    S.Count == Index_Primitives.Index<S.Element>.Count {
+extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`Protocol` {
     /// Removes and returns the element at the given end, or nil if empty.
     ///
     /// - Complexity: O(1)
@@ -114,8 +112,7 @@ extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`P
 }
 
 extension __QueueDoubleEnded where S: ~Copyable, S.Element: Copyable,
-    S: Store.`Protocol` & Buffer.`Protocol`,
-    S.Count == Index_Primitives.Index<S.Element>.Count {
+    S: Store.`Protocol` & Buffer.`Protocol` {
     /// Returns the element at the given end by value, or nil if empty.
     @inlinable
     public func peek(at position: Position) -> S.Element? {
