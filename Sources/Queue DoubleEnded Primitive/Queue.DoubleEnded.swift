@@ -16,7 +16,7 @@ public import Store_Protocol_Primitives
 public import Storage_Contiguous_Primitives
 public import Memory_Heap_Primitives
 public import Memory_Allocator_Primitive
-public import Shared_Primitive
+public import Ownership_Shared_Primitive
 public import Index_Primitives
 
 // MARK: - __QueueDoubleEnded (the deque carrier — generic over the ring COLUMN)
@@ -29,9 +29,9 @@ public import Index_Primitives
 ///
 /// ```swift
 /// __QueueDoubleEnded<            Buffer<…>.Ring        >   // zero-cost MOVE-ONLY (default)
-/// __QueueDoubleEnded<Shared<Int, Buffer<…>.Ring>       >   // explicit CoW value semantics
+/// __QueueDoubleEnded<Ownership.Shared<Int, Buffer<…>.Ring>       >   // explicit CoW value semantics
 /// __QueueDoubleEnded<            Buffer<…>.Ring.Bounded>   // fixed-capacity (the former .Fixed)
-/// __QueueDoubleEnded<Shared<Int, Buffer<…>.Ring.Bounded>>  // fixed-capacity CoW
+/// __QueueDoubleEnded<Ownership.Shared<Int, Buffer<…>.Ring.Bounded>>  // fixed-capacity CoW
 /// ```
 ///
 /// Pops and peeks at BOTH ends ride the front-anchored seam generically
@@ -110,8 +110,8 @@ extension __QueueDoubleEnded where S: ~Copyable {
     /// Creates an empty CoW (value-semantic) growable deque on the `Shared` column.
     @inlinable
     public init<E>(minimumCapacity: Index_Primitives.Index<E>.Count = .zero)
-    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring> {
-        self.init(store: Shared(
+    where S == Ownership.Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring> {
+        self.init(store: Ownership.Shared(
             Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring(minimumCapacity: minimumCapacity)
         ))
     }
@@ -119,8 +119,8 @@ extension __QueueDoubleEnded where S: ~Copyable {
     /// Creates an empty statically-unique deque of move-only elements on the `Shared` column.
     @inlinable
     public init<E: ~Copyable>(minimumCapacity: Index_Primitives.Index<E>.Count = .zero)
-    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring> {
-        self.init(store: Shared(
+    where S == Ownership.Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring> {
+        self.init(store: Ownership.Shared(
             Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring(minimumCapacity: minimumCapacity)
         ))
     }
@@ -128,8 +128,8 @@ extension __QueueDoubleEnded where S: ~Copyable {
     /// Creates an empty CoW fixed-capacity deque on the `Shared` bounded column.
     @inlinable
     public init<E>(capacity: Index_Primitives.Index<E>.Count)
-    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded> {
-        self.init(store: Shared(
+    where S == Ownership.Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded> {
+        self.init(store: Ownership.Shared(
             Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded(minimumCapacity: capacity)
         ))
     }
@@ -138,8 +138,8 @@ extension __QueueDoubleEnded where S: ~Copyable {
     /// on the `Shared` bounded column.
     @inlinable
     public init<E: ~Copyable>(capacity: Index_Primitives.Index<E>.Count)
-    where S == Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded> {
-        self.init(store: Shared(
+    where S == Ownership.Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded> {
+        self.init(store: Ownership.Shared(
             Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded(minimumCapacity: capacity)
         ))
     }

@@ -19,7 +19,7 @@ enum Main {
         print("=== swift-deque-primitives — family-tier benchmark (W2) ===")
         print("config: sizes=\(Bench.sizes) samples=\(Bench.samples) warmup=\(Bench.warmup)")
         print("targets/sample: element=\(Bench.elementOpsTarget) structure=\(Bench.structureOpsTarget) copiedSlots=\(Bench.copiedSlotsTarget)")
-        print("subjects: tower.direct=Deque<Ring> · tower.cow=Deque<Shared<E,Ring>> · stdlib=Swift.Array (front ops O(n) BY DESIGN)")
+        print("subjects: tower.direct=Deque<Ring> · tower.cow=Deque<Ownership.Shared<E,Ring>> · stdlib=Swift.Array (front ops O(n) BY DESIGN)")
         print("")
         Bench.globalWarmup()
 

@@ -8,7 +8,7 @@ import Buffer_Primitives_Test_Support
 import Storage_Contiguous_Primitives
 import Memory_Heap_Primitives
 import Memory_Allocator_Primitive
-import Shared_Primitive
+import Ownership_Shared_Primitive
 import Index_Primitives
 import Tagged_Primitives_Standard_Library_Integration
 import Ordinal_Primitives_Standard_Library_Integration
@@ -23,7 +23,7 @@ private typealias GrowableRing<E: ~Copyable> = Buffer<HeapStorage<E>>.Ring
 private typealias BoundedRing<E: ~Copyable> = Buffer<HeapStorage<E>>.Ring.Bounded
 
 private typealias MoveDeque<E: ~Copyable> = Deque<GrowableRing<E>>
-private typealias CoWDeque<E: ~Copyable> = Deque<Shared<E, GrowableRing<E>>>
+private typealias CoWDeque<E: ~Copyable> = Deque<Ownership.Shared<E, GrowableRing<E>>>
 private typealias FixedDeque<E: ~Copyable> = Deque<BoundedRing<E>>
 
 // MARK: - [DS-024]: the columns are lawful from the deque family's own suite
@@ -52,7 +52,7 @@ struct DequeColumnLawTests {
     @Test
     func `the shared growable-ring column obeys the seam ledger laws`() {
         let violations = Seam.Ledger.violations(
-            makeEmpty: { Shared(GrowableRing<Int>(minimumCapacity: Index<Int>.Count(4))) },
+            makeEmpty: { Ownership.Shared(GrowableRing<Int>(minimumCapacity: Index<Int>.Count(4))) },
             element: { $0 }
         )
         #expect(violations.isEmpty, "\(violations)")
@@ -61,7 +61,7 @@ struct DequeColumnLawTests {
     @Test
     func `the shared bounded-ring column obeys the seam ledger laws`() {
         let violations = Seam.Ledger.violations(
-            makeEmpty: { Shared(BoundedRing<Int>(minimumCapacity: Index<Int>.Count(4))) },
+            makeEmpty: { Ownership.Shared(BoundedRing<Int>(minimumCapacity: Index<Int>.Count(4))) },
             element: { $0 }
         )
         #expect(violations.isEmpty, "\(violations)")
@@ -221,7 +221,7 @@ struct DequeTeardownTests {
     func `the boxed lane tears down via the box drain`() {
         DequeProbe2.reset()
         do {
-            var d = Deque<Shared<DequeItem2, GrowableRing<DequeItem2>>>(minimumCapacity: 2)
+            var d = Deque<Ownership.Shared<DequeItem2, GrowableRing<DequeItem2>>>(minimumCapacity: 2)
             d.push(DequeItem2(7), to: .back)
             d.push(DequeItem2(8), to: .front)
             let n = d.count

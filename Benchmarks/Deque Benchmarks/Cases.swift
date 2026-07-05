@@ -17,7 +17,7 @@ import Buffer_Ring_Bounded_Primitive
 import Storage_Contiguous_Primitives
 import Memory_Heap_Primitives
 import Memory_Allocator_Primitive
-import Shared_Primitive
+import Ownership_Shared_Primitive
 import Index_Primitives
 import Tagged_Primitives_Standard_Library_Integration
 import Ordinal_Primitives
@@ -33,7 +33,7 @@ typealias GrowableRing<E: ~Copyable> = Buffer<HeapStorage<E>>.Ring
 
 typealias MoveDeque<E: ~Copyable> = Deque<GrowableRing<E>>
 
-typealias CoWDeque<E: ~Copyable> = Deque<Shared<E, GrowableRing<E>>>
+typealias CoWDeque<E: ~Copyable> = Deque<Ownership.Shared<E, GrowableRing<E>>>
 
 extension Bench {
     /// Typed count from a runtime size via the non-throwing `UInt` lane.
