@@ -57,7 +57,7 @@ extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`P
     @inlinable
     public mutating func pop(from position: Position) -> S.Element? {
         guard !isEmpty else { return nil }
-        store.prepareForMutation()
+        store.unshare()
         switch position {
         case .front:
             return store.move(at: .zero)
@@ -93,7 +93,7 @@ extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`P
     /// Consumes every element front-to-back, leaving the deque empty.
     @inlinable
     public mutating func drain(_ body: (consuming S.Element) -> Void) {
-        store.prepareForMutation()
+        store.unshare()
         while !isEmpty {
             body(store.move(at: .zero))
         }
@@ -135,7 +135,7 @@ extension __QueueDoubleEnded where S: Copyable, S: Store.`Protocol` {
     @inlinable
     public borrowing func clone() -> Self {
         var result = copy self
-        result.store.prepareForMutation()
+        result.store.unshare()
         return result
     }
 }
