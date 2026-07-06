@@ -19,6 +19,9 @@ let package = Package(
         // Convenience alias product matching the package name (the top-level `Deque<S>` typealias).
         .library(name: "Deque Primitives", targets: ["Deque Primitives"]),
 
+        // MARK: - Small variant ([DS-027].1: own product, NOT umbrella-re-exported)
+        .library(name: "Queue DoubleEnded Small Primitive", targets: ["Queue DoubleEnded Small Primitive"]),
+
         // MARK: - Fixed variant: DELETED at the ADT-families reshape (ASK-E — the
         // fixed-capacity story lives in the COLUMN: Queue<Buffer<…>.Ring.Bounded>.DoubleEnded)
     ],
@@ -26,6 +29,9 @@ let package = Package(
         .package(url: "https://github.com/swift-primitives/swift-queue-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-buffer-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-buffer-ring-primitives.git", branch: "main"),
+        // swift-memory-small-primitives: for the `Queue DoubleEnded Small Primitive` variant
+        // target ONLY ([DS-027].1) — `Queue<E>.DoubleEnded.Small<n>`'s Memory.Small<n> leaf.
+        .package(url: "https://github.com/swift-primitives/swift-memory-small-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-storage-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-ownership-shared-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-memory-heap-primitives.git", branch: "main"),
@@ -78,6 +84,23 @@ let package = Package(
             ]
         ),
 
+        // MARK: - Small type ([DS-027].1: own product, NO umbrella re-export — keeps the
+        //         heap-only consumers' closure lean; the Memory.Small<n> leaf dep lands on
+        //         THIS target only. The door's ops flow from __QueueDoubleEnded's
+        //         allocation-generic pins in `Queue DoubleEnded Primitives`.)
+        .target(
+            name: "Queue DoubleEnded Small Primitive",
+            dependencies: [
+                "Queue DoubleEnded Primitive",
+                .product(name: "Buffer Primitive", package: "swift-buffer-primitives"),
+                .product(name: "Buffer Ring Primitive", package: "swift-buffer-ring-primitives"),
+                .product(name: "Store Protocol Primitives", package: "swift-storage-primitives"),
+                .product(name: "Storage Contiguous Primitives", package: "swift-storage-primitives"),
+                .product(name: "Memory Allocator Primitive", package: "swift-memory-allocation-primitives"),
+                .product(name: "Memory Small Primitives", package: "swift-memory-small-primitives"),
+            ]
+        ),
+
         // MARK: - Deque umbrella — the top-level `Deque<S>` typealias + package-name-facing re-export
         .target(
             name: "Deque Primitives",
@@ -94,8 +117,10 @@ let package = Package(
             name: "Queue DoubleEnded Primitives Tests",
             dependencies: [
                 "Deque Primitives",
+                "Queue DoubleEnded Small Primitive",
                 .product(name: "Buffer Ring Primitives", package: "swift-buffer-ring-primitives"),
                 .product(name: "Buffer Primitives Test Support", package: "swift-buffer-primitives"),
+                .product(name: "Memory Small Primitives", package: "swift-memory-small-primitives"),
                 .product(name: "Tagged Primitives Standard Library Integration", package: "swift-tagged-primitives"),
                 .product(name: "Ordinal Primitives Standard Library Integration", package: "swift-ordinal-primitives"),
             ]
