@@ -21,6 +21,7 @@ public import Buffer_Ring_Bounded_Primitive
 public import Storage_Contiguous_Primitives
 public import Memory_Heap_Primitives
 public import Memory_Allocator_Primitive
+public import Memory_Allocator_Protocol_Primitives
 public import Ownership_Shared_Primitive
 public import Index_Primitives
 
@@ -31,10 +32,15 @@ public import Index_Primitives
 extension __QueueDoubleEnded where S: ~Copyable {
     /// Pushes an element at the given end (direct growable column; grows as needed).
     ///
+    /// Allocation-generic ([DS-029] form 2, `Resource: Memory.Growable`): one pin serves
+    /// the heap column AND the `Small<n>` inline-budget column — the ring's
+    /// `pushFront`/`pushBack` are themselves R-generic (W3.1), so the growth path re-runs
+    /// the inline→heap spill decision.
+    ///
     /// - Complexity: O(1) amortized
     @inlinable
-    public mutating func push<E: ~Copyable>(_ element: consuming E, to position: Position)
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring {
+    public mutating func push<E: ~Copyable, Resource: Memory.Growable & ~Copyable>(_ element: consuming E, to position: Position)
+    where S == Buffer<Storage<Memory.Allocator<Resource>>.Contiguous<E>>.Ring {
         switch position {
         case .front:
             store.pushFront(element)
@@ -107,9 +113,12 @@ extension __QueueDoubleEnded where S: ~Copyable {
 
 extension __QueueDoubleEnded where S: ~Copyable {
     /// Removes all elements (direct growable column).
+    ///
+    /// Allocation-generic ([DS-029] form 2): `removeAll()` rides the ledgered seam (form 1)
+    /// and the `!keepingCapacity` reset rides `S.create` (form 2).
     @inlinable
-    public mutating func clear<E: ~Copyable>(keepingCapacity: Bool = true)
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring {
+    public mutating func clear<E: ~Copyable, Resource: Memory.Growable & ~Copyable>(keepingCapacity: Bool = true)
+    where S == Buffer<Storage<Memory.Allocator<Resource>>.Contiguous<E>>.Ring {
         store.removeAll()
         if !keepingCapacity {
             store = S(minimumCapacity: .zero)
@@ -150,9 +159,11 @@ extension __QueueDoubleEnded where S: ~Copyable {
 
 extension __QueueDoubleEnded where S: ~Copyable {
     /// Reserves capacity for at least the given number of elements (direct column).
+    ///
+    /// Allocation-generic ([DS-029] form 2).
     @inlinable
-    public mutating func reserve<E: ~Copyable>(_ minimumCapacity: Index_Primitives.Index<E>.Count)
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring {
+    public mutating func reserve<E: ~Copyable, Resource: Memory.Growable & ~Copyable>(_ minimumCapacity: Index_Primitives.Index<E>.Count)
+    where S == Buffer<Storage<Memory.Allocator<Resource>>.Contiguous<E>>.Ring {
         store.reserveCapacity(minimumCapacity)
     }
 
@@ -172,9 +183,12 @@ extension __QueueDoubleEnded where S: ~Copyable {
 
 extension __QueueDoubleEnded where S: ~Copyable {
     /// Returns an independent copy of this deque (direct growable column).
+    ///
+    /// Allocation-generic ([DS-029] form 2; `store.clone()` requires `Element: Copyable`,
+    /// already implied by the copyable-only `E`).
     @inlinable
-    public func clone<E>() -> Self
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring {
+    public func clone<E, Resource: Memory.Growable & ~Copyable>() -> Self
+    where S == Buffer<Storage<Memory.Allocator<Resource>>.Contiguous<E>>.Ring {
         Self(store: store.clone())
     }
 

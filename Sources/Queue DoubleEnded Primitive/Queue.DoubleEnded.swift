@@ -16,6 +16,7 @@ public import Store_Protocol_Primitives
 public import Storage_Contiguous_Primitives
 public import Memory_Heap_Primitives
 public import Memory_Allocator_Primitive
+public import Memory_Allocator_Protocol_Primitives
 public import Ownership_Shared_Primitive
 public import Index_Primitives
 
@@ -94,9 +95,13 @@ extension __QueueDoubleEnded where S: Store.`Protocol` & ~Copyable {
 
 extension __QueueDoubleEnded where S: ~Copyable {
     /// Creates an empty MOVE-ONLY growable deque (the default ownership column).
+    ///
+    /// Allocation-generic ([DS-029] form 2, `Resource: Memory.Growable`): one pin serves
+    /// the heap column AND the `Small<n>` inline-budget column; `Memory.Inline` correctly
+    /// falls outside the `Memory.Growable` fence.
     @inlinable
-    public init<E: ~Copyable>(minimumCapacity: Index_Primitives.Index<E>.Count = .zero)
-    where S == Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring {
+    public init<E: ~Copyable, Resource: Memory.Growable & ~Copyable>(minimumCapacity: Index_Primitives.Index<E>.Count = .zero)
+    where S == Buffer<Storage<Memory.Allocator<Resource>>.Contiguous<E>>.Ring {
         self.init(store: S(minimumCapacity: minimumCapacity))
     }
 
