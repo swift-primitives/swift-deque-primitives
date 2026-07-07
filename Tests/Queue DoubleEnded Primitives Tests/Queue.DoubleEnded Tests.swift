@@ -1,17 +1,17 @@
-import Deque_Primitives
-import Queue_Primitive
 import Buffer_Primitive
+import Buffer_Primitives_Test_Support
+import Buffer_Ring_Bounded_Primitive
 import Buffer_Ring_Primitive
 import Buffer_Ring_Primitives
-import Buffer_Ring_Bounded_Primitive
-import Buffer_Primitives_Test_Support
-import Storage_Contiguous_Primitives
-import Memory_Heap_Primitives
-import Memory_Allocator_Primitive
-import Ownership_Shared_Primitive
+import Deque_Primitives
 import Index_Primitives
-import Tagged_Primitives_Standard_Library_Integration
+import Memory_Allocator_Primitive
+import Memory_Heap_Primitives
 import Ordinal_Primitives_Standard_Library_Integration
+import Ownership_Shared_Primitive
+import Queue_Primitive
+import Storage_Contiguous_Primitives
+import Tagged_Primitives_Standard_Library_Integration
 import Testing
 
 // The column-keyed deque suite over the same four ring columns as the queue.
@@ -75,7 +75,7 @@ struct DequeCoreTests {
     func `pushes and pops at both ends; wrap-safe order`() {
         var d = MoveDeque<Int>(minimumCapacity: 4)
         d.push(2, to: .back)
-        d.push(1, to: .front)                   // head retreats (wraps physically)
+        d.push(1, to: .front)  // head retreats (wraps physically)
         d.push(3, to: .back)
         let n = d.count
         #expect(n == Index<Int>.Count(3))
@@ -140,7 +140,8 @@ struct DequeCoreTests {
         #expect(grown)
         var c = d.clone()
         _ = c.pop(from: .front)
-        let mine = d.count, theirs = c.count
+        let mine = d.count
+        let theirs = c.count
         #expect(mine == Index<Int>.Count(1))
         #expect(theirs == Index<Int>.Count(0))
         d.clear(keepingCapacity: true)
@@ -157,8 +158,9 @@ struct DequeCoWTests {
         var d1 = CoWDeque<Int>(minimumCapacity: 4)
         d1.push(2, to: .back)
         let d2 = d1
-        d1.push(1, to: .front)                  // withUnique(consuming:) detaches first
-        let mine = d1.count, theirs = d2.count
+        d1.push(1, to: .front)  // withUnique(consuming:) detaches first
+        let mine = d1.count
+        let theirs = d2.count
         #expect(mine == Index<Int>.Count(2))
         #expect(theirs == Index<Int>.Count(1))
         let myFront = d1.peek(at: .front)
@@ -202,7 +204,7 @@ struct DequeTeardownTests {
         do {
             var d = MoveDeque<DequeItem>(minimumCapacity: 4)
             d.push(DequeItem(2), to: .back)
-            d.push(DequeItem(1), to: .front)    // wrapped two-run state
+            d.push(DequeItem(1), to: .front)  // wrapped two-run state
             d.push(DequeItem(3), to: .back)
             if let front = d.pop(from: .front) {
                 let id = front.id

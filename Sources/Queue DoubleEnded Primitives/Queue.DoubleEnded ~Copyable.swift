@@ -12,12 +12,12 @@
 // The COLUMN-GENERIC deque surface: both-end pops and peeks ride the front-anchored
 // seam (`move(at: .zero)` = front; `move(at: count − 1)` = back), the gate makes them
 // CoW-correct on the `Shared` columns; pushes pin per column (`+Columns.swift`).
-public import Queue_DoubleEnded_Primitive
+import Affine_Primitives_Standard_Library_Integration
 public import Buffer_Protocol_Primitives
-public import Store_Protocol_Primitives
 import Index_Primitives
 import Ordinal_Primitives_Standard_Library_Integration
-import Affine_Primitives_Standard_Library_Integration
+public import Queue_DoubleEnded_Primitive
+public import Store_Protocol_Primitives
 
 // ============================================================================
 // MARK: - Properties
@@ -59,6 +59,7 @@ extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`P
         switch position {
         case .front:
             return store.move(at: .zero)
+
         case .back:
             let last: Index = store.count.subtract.saturating(.one).map(Ordinal.init)
             return store.move(at: last)
@@ -66,6 +67,7 @@ extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`P
     }
 
     /// Removes and returns the element at the given end, or nil if empty.
+    ///
     /// (Alias of `pop(from:)` — the shipping surface's consuming spelling.)
     @inlinable
     public mutating func take(from position: Position) -> S.Element? {
@@ -82,6 +84,7 @@ extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`P
         switch position {
         case .front:
             return body(store[.zero])
+
         case .back:
             let last: Index = store.count.subtract.saturating(.one).map(Ordinal.init)
             return body(store[last])
@@ -111,8 +114,12 @@ extension __QueueDoubleEnded where S: ~Copyable, S: Store.`Protocol` & Buffer.`P
     }
 }
 
-extension __QueueDoubleEnded where S: ~Copyable, S.Element: Copyable,
-    S: Store.`Protocol` & Buffer.`Protocol` {
+extension __QueueDoubleEnded
+where
+    S: ~Copyable,
+    S.Element: Copyable,
+    S: Store.`Protocol` & Buffer.`Protocol`
+{
     /// Returns the element at the given end by value, or nil if empty.
     @inlinable
     public func peek(at position: Position) -> S.Element? {

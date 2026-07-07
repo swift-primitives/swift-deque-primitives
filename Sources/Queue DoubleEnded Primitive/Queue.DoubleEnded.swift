@@ -10,15 +10,15 @@
 // ===----------------------------------------------------------------------===//
 
 public import Buffer_Primitive
-public import Buffer_Ring_Primitive
 public import Buffer_Ring_Bounded_Primitive
-public import Store_Protocol_Primitives
-public import Storage_Contiguous_Primitives
-public import Memory_Heap_Primitives
+public import Buffer_Ring_Primitive
+public import Index_Primitives
 public import Memory_Allocator_Primitive
 public import Memory_Allocator_Protocol_Primitives
+public import Memory_Heap_Primitives
 public import Ownership_Shared_Primitive
-public import Index_Primitives
+public import Storage_Contiguous_Primitives
+public import Store_Protocol_Primitives
 
 // MARK: - __QueueDoubleEnded (the deque carrier — generic over the ring COLUMN)
 
@@ -88,6 +88,11 @@ extension __QueueDoubleEnded: Sendable where S: Sendable & ~Copyable {}
 // MARK: - Typed index (re-anchoring front-relative positions, like the queue's)
 
 extension __QueueDoubleEnded where S: Store.`Protocol` & ~Copyable {
+    /// Type-safe index for deque elements — typed by the COLUMN's element, preventing
+    /// cross-collection index confusion.
+    ///
+    /// Position 0 is the FRONT of the deque; the last position is the back. Positions
+    /// RE-ANCHOR after a pop at either end (the ring discipline's front-anchored indexing).
     public typealias Index = Index_Primitives.Index<S.Element>
 }
 
@@ -116,27 +121,33 @@ extension __QueueDoubleEnded where S: ~Copyable {
     @inlinable
     public init<E>(minimumCapacity: Index_Primitives.Index<E>.Count = .zero)
     where S == Ownership.Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring> {
-        self.init(store: Ownership.Shared(
-            Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring(minimumCapacity: minimumCapacity)
-        ))
+        self.init(
+            store: Ownership.Shared(
+                Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring(minimumCapacity: minimumCapacity)
+            )
+        )
     }
 
     /// Creates an empty statically-unique deque of move-only elements on the `Shared` column.
     @inlinable
     public init<E: ~Copyable>(minimumCapacity: Index_Primitives.Index<E>.Count = .zero)
     where S == Ownership.Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring> {
-        self.init(store: Ownership.Shared(
-            Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring(minimumCapacity: minimumCapacity)
-        ))
+        self.init(
+            store: Ownership.Shared(
+                Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring(minimumCapacity: minimumCapacity)
+            )
+        )
     }
 
     /// Creates an empty CoW fixed-capacity deque on the `Shared` bounded column.
     @inlinable
     public init<E>(capacity: Index_Primitives.Index<E>.Count)
     where S == Ownership.Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded> {
-        self.init(store: Ownership.Shared(
-            Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded(minimumCapacity: capacity)
-        ))
+        self.init(
+            store: Ownership.Shared(
+                Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded(minimumCapacity: capacity)
+            )
+        )
     }
 
     /// Creates an empty statically-unique fixed-capacity deque of move-only elements
@@ -144,8 +155,10 @@ extension __QueueDoubleEnded where S: ~Copyable {
     @inlinable
     public init<E: ~Copyable>(capacity: Index_Primitives.Index<E>.Count)
     where S == Ownership.Shared<E, Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded> {
-        self.init(store: Ownership.Shared(
-            Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded(minimumCapacity: capacity)
-        ))
+        self.init(
+            store: Ownership.Shared(
+                Buffer<Storage<Memory.Allocator<Memory.Heap>>.Contiguous<E>>.Ring.Bounded(minimumCapacity: capacity)
+            )
+        )
     }
 }

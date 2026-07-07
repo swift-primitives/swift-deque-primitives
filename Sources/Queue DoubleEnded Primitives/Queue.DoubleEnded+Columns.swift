@@ -13,17 +13,17 @@
 // clear, and capacity ops per ratified column. `Shared` forms cross the box via the
 // gate-first scoped accessors ([MEM-OWN-017]: enqueued elements thread as consuming
 // closure PARAMETERS).
-public import Queue_DoubleEnded_Primitive
-public import Queue_Primitive
 public import Buffer_Primitive
-public import Buffer_Ring_Primitive
 public import Buffer_Ring_Bounded_Primitive
-public import Storage_Contiguous_Primitives
-public import Memory_Heap_Primitives
+public import Buffer_Ring_Primitive
+public import Index_Primitives
 public import Memory_Allocator_Primitive
 public import Memory_Allocator_Protocol_Primitives
+public import Memory_Heap_Primitives
 public import Ownership_Shared_Primitive
-public import Index_Primitives
+public import Queue_DoubleEnded_Primitive
+public import Queue_Primitive
+public import Storage_Contiguous_Primitives
 
 // ============================================================================
 // MARK: - Push (growable columns: grows; bounded columns: typed-throws on full)
@@ -44,6 +44,7 @@ extension __QueueDoubleEnded where S: ~Copyable {
         switch position {
         case .front:
             store.pushFront(element)
+
         case .back:
             store.pushBack(element)
         }
@@ -60,6 +61,7 @@ extension __QueueDoubleEnded where S: ~Copyable {
             switch position {
             case .front:
                 ring.pushFront(element)
+
             case .back:
                 ring.pushBack(element)
             }
@@ -77,6 +79,7 @@ extension __QueueDoubleEnded where S: ~Copyable {
         switch position {
         case .front:
             rejected = store.push.front(element)
+
         case .back:
             rejected = store.push.back(element)
         }
@@ -97,6 +100,7 @@ extension __QueueDoubleEnded where S: ~Copyable {
             switch position {
             case .front:
                 return ring.push.front(element)
+
             case .back:
                 return ring.push.back(element)
             }

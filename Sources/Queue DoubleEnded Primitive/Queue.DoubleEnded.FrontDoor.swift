@@ -9,13 +9,13 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import Queue_Primitive
 public import Buffer_Primitive
 public import Buffer_Ring_Primitive
-public import Store_Protocol_Primitives
-public import Storage_Contiguous_Primitives
-public import Memory_Heap_Primitives
 public import Memory_Allocator_Primitive
+public import Memory_Heap_Primitives
+public import Queue_Primitive
+public import Storage_Contiguous_Primitives
+public import Store_Protocol_Primitives
 
 // MARK: - Queue<E>.DoubleEnded — the sibling NEST alias ([DS-028], D4.1 sense (b))
 

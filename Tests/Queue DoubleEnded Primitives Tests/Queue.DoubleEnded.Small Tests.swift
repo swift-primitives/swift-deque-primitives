@@ -10,10 +10,10 @@
 // ===----------------------------------------------------------------------===//
 
 import Deque_Primitives
-import Queue_Primitive
-import Queue_DoubleEnded_Small_Primitive
-import Memory_Small_Primitives
 import Index_Primitives
+import Memory_Small_Primitives
+import Queue_DoubleEnded_Small_Primitive
+import Queue_Primitive
 import Testing
 
 // MARK: - W3.2 `Queue<E>.DoubleEnded.Small<n>` door coverage
@@ -37,7 +37,7 @@ struct DequeSmallDoorTests {
 
         // Push 16 `Int`s (128 bytes) to the back, past the 64-byte inline budget, forcing
         // at least one inline→heap spill during growth (the ring's form-2 grow path).
-        for value in 1 ... 16 {
+        for value in 1...16 {
             d.push(value, to: .back)
         }
         #expect(d.count == Index<Int>.Count(16))
@@ -45,15 +45,15 @@ struct DequeSmallDoorTests {
         // Pop from the front — FIFO order preserved across the spill boundary.
         var seen: [Int] = []
         while let x = d.pop(from: .front) { seen.append(x) }
-        #expect(seen == Array(1 ... 16))
+        #expect(seen == Array(1...16))
     }
 
     @Test
     func `the door supports both ends + the growable family surface (push / pop / reserve / clear / clone)`() {
         var d = Queue<Int>.DoubleEnded.Small<64>()
-        d.push(1, to: .back)      // [1]
-        d.push(2, to: .back)      // [1, 2]
-        d.push(0, to: .front)     // [0, 1, 2]
+        d.push(1, to: .back)  // [1]
+        d.push(2, to: .back)  // [1, 2]
+        d.push(0, to: .front)  // [0, 1, 2]
 
         #expect(d.pop(from: .front) == 0)
         #expect(d.pop(from: .back) == 2)
@@ -86,11 +86,11 @@ struct DequeSmallDoorTests {
             var d = Queue<DequeSmallItem>.DoubleEnded.Small<64>(minimumCapacity: 2)
             d.push(DequeSmallItem(1), to: .back)
             d.push(DequeSmallItem(2), to: .back)
-            d.push(DequeSmallItem(0), to: .front)   // 3×8 < 64: still inline
+            d.push(DequeSmallItem(0), to: .front)  // 3×8 < 64: still inline
             #expect(d.count == Index<DequeSmallItem>.Count(3))
 
             if let front = d.pop(from: .front) {
-                #expect(front.id == 0)              // front-pushed; destroyed at scope end
+                #expect(front.id == 0)  // front-pushed; destroyed at scope end
             } else {
                 Issue.record("expected the front element")
             }
