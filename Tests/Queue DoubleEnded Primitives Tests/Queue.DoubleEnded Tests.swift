@@ -117,7 +117,7 @@ struct DequeCoreTests {
         try d.push(1, to: .back)
         try d.push(0, to: .front)
         var thrown = false
-        do {
+        do throws(__Queue<BoundedRing<Int>>.Error) {
             try d.push(9, to: .back)
         } catch {
             thrown = true
@@ -241,6 +241,9 @@ private struct DequeItem: ~Copyable {
 }
 
 private enum DequeProbe {
+}
+
+extension DequeProbe {
     nonisolated(unsafe) static var _destroyed: [Int] = []
     static func reset() { unsafe _destroyed = [] }
     static func recordDestroy(_ id: Int) { unsafe _destroyed.append(id) }
@@ -254,6 +257,9 @@ private struct DequeItem2: ~Copyable {
 }
 
 private enum DequeProbe2 {
+}
+
+extension DequeProbe2 {
     nonisolated(unsafe) static var _destroyed: [Int] = []
     static func reset() { unsafe _destroyed = [] }
     static func recordDestroy(_ id: Int) { unsafe _destroyed.append(id) }
