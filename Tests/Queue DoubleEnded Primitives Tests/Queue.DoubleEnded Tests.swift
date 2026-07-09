@@ -29,7 +29,7 @@ private typealias FixedDeque<E: ~Copyable> = Deque<BoundedRing<E>>
 // MARK: - [DS-024]: the columns are lawful from the deque family's own suite
 
 @Suite
-struct DequeColumnLawTests {
+struct `Deque Column Law Tests` {
 
     @Test
     func `the direct growable-ring column obeys the seam ledger laws`() {
@@ -69,7 +69,7 @@ struct DequeColumnLawTests {
 }
 
 @Suite(.serialized)
-struct DequeCoreTests {
+struct `Deque Core Tests` {
 
     @Test
     func `pushes and pops at both ends; wrap-safe order`() {
@@ -151,7 +151,7 @@ struct DequeCoreTests {
 }
 
 @Suite(.serialized)
-struct DequeCoWTests {
+struct `Deque CoW Tests` {
 
     @Test
     func `pushes at both ends detach from siblings through the box`() {
@@ -196,7 +196,7 @@ struct DequeCoWTests {
 }
 
 @Suite(.serialized)
-struct DequeTeardownTests {
+struct `Deque Teardown Tests` {
 
     @Test
     func `move-only elements at both ends tear down exactly once`() {
@@ -267,7 +267,7 @@ extension DequeProbe2 {
 }
 
 @Suite
-struct DequeSendableTests {
+struct `Deque Sendable Tests` {
 
     @Test
     func `sendable composes through the columns`() {

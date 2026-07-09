@@ -25,8 +25,8 @@ import Testing
 // spills inline→heap and stays FIFO, and (c) the door is reachable from a MOVE-ONLY
 // element (the M1 `~Copyable` restatement on the door extension).
 
-@Suite("Queue<E>.DoubleEnded.Small<n> door")
-struct DequeSmallDoorTests {
+@Suite
+struct `Deque Small Door Tests` {
 
     @Test
     func `the door resolves and is FIFO across the inline→heap spill (byte budget)`() {
